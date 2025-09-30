@@ -1,0 +1,46 @@
+{
+  "name": "duan_frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 5000",
+    "build": "next build",
+    "start": "next start -p 5000",
+    "lint": "next lint",
+    "optimize-images": "node scripts/optimize-player-images.js"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.7",
+    "@heroicons/react": "^2.2.0",
+    "@hookform/resolvers": "^5.2.1",
+    "@reduxjs/toolkit": "^2.8.2",
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "@tanstack/react-query": "^5.84.1",
+    "autoprefixer": "^10.4.21",
+    "axios": "^1.11.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "form-data": "^4.0.4",
+    "framer-motion": "^12.23.12",
+    "lucide-react": "^0.536.0",
+    "next": "15.4.5",
+    "node-fetch": "^3.3.2",
+    "postcss": "^8.5.6",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-hook-form": "^7.62.0",
+    "react-redux": "^9.2.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^3.4.17",
+    "zod": "^4.0.14"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.5",
+    "typescript": "^5"
+  }
+}

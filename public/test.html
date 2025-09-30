@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button { padding: 10px 20px; margin: 10px 5px; cursor: pointer; }
+        #console { background: #000; color: #00ff00; padding: 15px; border-radius: 5px; font-family: monospace; height: 300px; overflow-y: scroll; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Image API Test Console</h1>
+        
+        <button onclick="testImageAPI()">Test API</button>
+        <button onclick="testDirectImage()">Test Direct Image</button>
+        <button onclick="clearConsole()">Clear Console</button>
+        
+        <div id="console"></div>
+        
+        <div id="image-container">
+            <h3>Image Display Test:</h3>
+        </div>
+    </div>
+
+    <script>
+        // Console logging to div
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const logLine = document.createElement('div');
+            logLine.innerHTML = `[${timestamp}] ${message}`;
+            logLine.style.color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#00ff00';
+            console.appendChild(logLine);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '';
+        }
+
+        async function testImageAPI() {
+            log('🔍 Testing Image API...', 'info');
+            
+            try {
+                // Test API call
+                const apiResponse = await fetch('http://localhost:3000/api/v1/products/68a5f51e7b56d117bbdb03d6/images', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:5000'
+                    }
+                });
+                
+                log(`📡 API Response Status: ${apiResponse.status}`, apiResponse.ok ? 'success' : 'error');
+                
+                if (apiResponse.ok) {
+                    const data = await apiResponse.json();
+                    log(`✅ API Success: ${JSON.stringify(data, null, 2)}`, 'success');
+                    
+                    if (data.data?.images?.length > 0) {
+                        const firstImage = data.data.images[0];
+                        log(`🖼️ First Image: ${firstImage.img} (Color: ${firstImage.color})`, 'info');
+                        
+                        // Test direct image loading
+                        await testImageLoad(firstImage.img);
+                    } else {
+                        log('⚠️ No images found in response', 'error');
+                    }
+                } else {
+                    const errorText = await apiResponse.text();
+                    log(`❌ API failed: ${errorText}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testImageLoad(imageName) {
+            const imageUrl = `http://localhost:3000/uploads/products/${imageName}`;
+            log(`📸 Testing image URL: ${imageUrl}`, 'info');
+            
+            try {
+                const imageResponse = await fetch(imageUrl, {
+                    headers: { 'Origin': 'http://localhost:5000' }
+                });
+                
+                log(`🖼️ Image Response Status: ${imageResponse.status}`, imageResponse.ok ? 'success' : 'error');
+                log(`🖼️ Content-Type: ${imageResponse.headers.get('content-type')}`, 'info');
+                log(`🖼️ Content-Length: ${imageResponse.headers.get('content-length')} bytes`, 'info');
+                log(`🖼️ CORS Origin: ${imageResponse.headers.get('access-control-allow-origin')}`, 'info');
+                
+                if (imageResponse.ok) {
+                    displayImage(imageUrl, imageName);
+                    log('✅ Image loaded successfully!', 'success');
+                } else {
+                    log(`❌ Failed to load image: ${imageResponse.status}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Image test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function displayImage(imageUrl, imageName) {
+            const container = document.getElementById('image-container');
+            
+            const img = document.createElement('img');
+            img.crossOrigin = 'anonymous';
+            img.src = imageUrl;
+            img.alt = imageName;
+            img.style.border = '2px solid green';
+            img.style.margin = '10px';
+            img.style.maxWidth = '200px';
+            img.style.height = 'auto';
+            
+            img.onload = () => {
+                log(`✅ Image displayed successfully: ${imageName}`, 'success');
+            };
+            
+            img.onerror = (e) => {
+                log(`❌ Failed to display image: ${imageName}`, 'error');
+                img.style.border = '2px solid red';
+            };
+            
+            const label = document.createElement('div');
+            label.textContent = `Image: ${imageName}`;
+            label.style.fontSize = '12px';
+            label.style.color = '#666';
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'inline-block';
+            wrapper.style.margin = '10px';
+            wrapper.appendChild(img);
+            wrapper.appendChild(label);
+            
+            container.appendChild(wrapper);
+        }
+
+        async function testDirectImage() {
+            log('🔍 Testing direct image load...', 'info');
+            await testImageLoad('logitech.png');
+        }
+
+        // Auto run test on load
+        window.addEventListener('load', () => {
+            log('🚀 Image API Test Console Ready!', 'success');
+            log('📝 Click "Test API" to run the test', 'info');
+        });
+    </script>
+</body>
+</html>

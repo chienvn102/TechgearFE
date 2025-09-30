@@ -1,0 +1,168 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Temporary folders
+tmp/
+temp/
+
+# All markdown files (documentation)
+*.md
+
+# All test files
+test-*.js
+test-*.html
+test-*.ps1
+debug-*.js
+quick-*.js
+upload-*.js
+check-*.js
+create-*.js
+fix-*.js
+browser-*.js
+
+# Specific test and debug files
+test-admin-*.js
+test-api-*.js
+test-auth-*.js
+test-backend-*.js
+test-banner-*.js
+test-brand-*.js
+test-checkout-*.js
+test-cloudinary-*.js
+test-complete-*.js
+test-correct-*.js
+test-create-*.js
+test-crud-*.js
+test-css-*.js
+test-delete-*.js
+test-direct-*.js
+test-edit-*.js
+test-fetch-*.js
+test-form-*.js
+test-frontend-*.js
+test-get-*.js
+test-homepage-*.js
+test-hydration-*.js
+test-icon-*.js
+test-image-*.js
+test-login-*.js
+test-order-*.js
+test-postman-*.js
+test-product-*.js
+test-productselector-*.js
+test-simple-*.js
+test-upload-*.js
+test-users-*.js
+test-valid-*.js
+
+# Debug files
+debug-admin-*.js
+debug-api-*.js
+debug-auth-*.js
+debug-banner-*.js
+debug-cart-*.js
+debug-category-*.js
+debug-checkout-*.js
+debug-complete-*.js
+debug-detailed-*.js
+debug-form-*.js
+debug-frontend-*.js
+debug-image-*.js
+debug-product-*.js
+debug-route-*.js
+debug-token-*.js
+debug-upload-*.js
+debug-user-*.js
+
+# Quick test files
+quick-auth-*.js
+quick-login-*.js
+
+# Upload test files
+upload-banner-*.js
+upload-sample-*.js
+
+# Check files
+check-banner-*.js
+
+# Create files
+create-banners-*.js
+
+# Fix files
+fix-token-*.js
+
+# Browser test files
+browser-console-*.js
+
+# HTML test files
+test-*.html
+test-direct-*.html
+test-api-*.html
+test-image-*.html
+
+# PowerShell test files
+test-*.ps1
+test-backend-*.ps1
+test-image-*.ps1
+
+# Temporary package files
+package.json.temp
+
+# Documentation files
+README.md
+REAME.md
+*_COMPLETE*.md
+*_REPORT*.md
+*_PLAN*.md
+*_GUIDE*.md
+*_SUMMARY*.md
+*_FIX*.md
+*_DEBUG*.md
+*_PROGRESS*.md
+*_IMPLEMENTATION*.md
+*_INTEGRATION*.md
+*_REDESIGN*.md
+*_UPDATED*.md
+*_FINAL*.md
+*_NEEDED*.md
+*_INFO*.md
+*_TEST*.md
