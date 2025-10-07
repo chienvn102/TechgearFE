@@ -28,6 +28,11 @@ import { CustomerAddress } from '@/types';
 import { useCart } from '@/contexts/CartContext';
 import { AddressSelection } from '@/features/address/components/AddressSelection';
 
+// PayOS imports
+import { PAYOS_PAYMENT_METHOD_ID, CreatePaymentResponse } from '@/types/payment.types';
+import { paymentService } from '@/services/paymentService';
+import PayOSPaymentDialog from '@/components/PayOSPaymentDialog';
+
 // Validation schema
 const checkoutSchema = z.object({
   customer_name: z.string().min(2, 'Tên khách hàng phải có ít nhất 2 ký tự'),
@@ -86,6 +91,11 @@ export default function CheckoutPage() {
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [isLoadingPaymentMethods, setIsLoadingPaymentMethods] = useState(false);
+
+  // PayOS payment state
+  const [showPayOSDialog, setShowPayOSDialog] = useState(false);
+  const [payosPaymentData, setPayosPaymentData] = useState<CreatePaymentResponse['data'] | null>(null)
+  const [isCreatingPayment, setIsCreatingPayment] = useState(false);
 
   const {
     register,
@@ -358,15 +368,70 @@ export default function CheckoutPage() {
       
       if (result.success) {
         setOrderData(result.data);
-        setSuccess(true);
+
+        // Check if payment method is PayOS
+        const isPayOSMethod = data.payment_method_id === PAYOS_PAYMENT_METHOD_ID;
         
-        // Clear cart after successful order
-        clearCart();
-        
-        // Redirect to success page after 3 seconds
-        setTimeout(() => {
-          router.push(`/orders/${result.data.order.od_id}`);
-        }, 3000);
+        if (isPayOSMethod) {
+          // PayOS payment flow: Create payment and show dialog
+          try {
+            setIsCreatingPayment(true);
+            
+            const paymentResponse = await paymentService.createPayOSPayment({
+              order_id: result.data.order._id,
+              payment_method_id: data.payment_method_id,
+              amount: finalTotal,
+              buyer_name: data.customer_name,
+              buyer_email: data.email || 'guest@example.com',
+              buyer_phone: data.phone_number,
+              items: cartItems.map((item) => ({
+                name: item.pd_name,
+                quantity: item.quantity,
+                price: item.pd_price
+              }))
+            });
+
+            if (paymentResponse.success && paymentResponse.data) {
+              setPayosPaymentData(paymentResponse.data);
+              setShowPayOSDialog(true);
+              // HOLD: Don't redirect yet, wait for payment confirmation
+            } else {
+              // Payment creation failed - need to handle this
+              console.error('❌ PayOS payment creation failed:', paymentResponse.message);
+              setError(paymentResponse.message || 'Không thể tạo thanh toán PayOS. Đơn hàng đã được tạo nhưng chưa thanh toán. Vui lòng liên hệ hỗ trợ.');
+              
+              // Optionally: Still redirect to order detail so customer can see their order
+              setTimeout(() => {
+                router.push(`/orders/${result.data.order.od_id}`);
+              }, 5000);
+            }
+          } catch (paymentError: any) {
+            console.error('❌ PayOS payment error:', paymentError);
+            
+            // Payment creation error - order is created but payment link failed
+            const errorMessage = paymentError?.message || 'Có lỗi xảy ra khi tạo thanh toán PayOS';
+            
+            setError(`${errorMessage}. Đơn hàng #${result.data.order.od_id} đã được tạo nhưng chưa có link thanh toán. Vui lòng liên hệ hỗ trợ hoặc chọn phương thức thanh toán khác.`);
+            
+            // Redirect to order detail after 5 seconds
+            setTimeout(() => {
+              router.push(`/orders/${result.data.order.od_id}`);
+            }, 5000);
+          } finally {
+            setIsCreatingPayment(false);
+          }
+        } else {
+          // Normal flow for COD/Bank Transfer: Show success and redirect
+          setSuccess(true);
+          
+          // Clear cart after successful order
+          clearCart();
+          
+          // Redirect to order detail after 3 seconds
+          setTimeout(() => {
+            router.push(`/orders/${result.data.order.od_id}`);
+          }, 3000);
+        }
     } else {
         setError(result.message || 'Có lỗi xảy ra khi tạo đơn hàng');
       }
@@ -388,6 +453,26 @@ export default function CheckoutPage() {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  // PayOS payment handlers
+  const handlePayOSSuccess = (orderId: string) => {
+    // Close dialog
+    setShowPayOSDialog(false);
+    
+    // Clear cart
+    clearCart();
+    
+    // Redirect to order detail using the orderId from payment confirmation
+    if (orderId && orderData && orderData.order) {
+      router.push(`/orders/${orderData.order.od_id}`);
+    }
+  };
+
+  const handlePayOSCancel = () => {
+    setShowPayOSDialog(false);
+    setPayosPaymentData(null);
+    setError('Thanh toán đã bị hủy. Bạn có thể thử lại.');
   };
 
   const isStepValid = (step: number) => {
@@ -886,6 +971,17 @@ export default function CheckoutPage() {
             </div>
           </motion.div>
       </div>
+
+      {/* PayOS Payment Dialog */}
+      {payosPaymentData && (
+        <PayOSPaymentDialog
+          isOpen={showPayOSDialog}
+          onClose={handlePayOSCancel}
+          paymentData={payosPaymentData}
+          onSuccess={handlePayOSSuccess}
+          onCancel={handlePayOSCancel}
+        />
+      )}
     </div>
   );
 }

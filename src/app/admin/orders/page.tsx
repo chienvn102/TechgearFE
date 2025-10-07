@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { orderService, type Order } from '@/features/orders/services/orderService';
 import { getStatusLabel, getStatusColor } from '@/features/orders/utils/orderUtils';
+import { PaymentStatusCell } from '@/components/PaymentStatusCell';
 
 // Status color mapping
 const statusColors = {
@@ -418,9 +419,11 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-4 hidden lg:table-cell">
                         <div className="min-w-0">
                           {order.payment_status_id ? (
-                            <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium border bg-blue-100 text-blue-800 border-blue-200 truncate">
-                              {typeof order.payment_status_id === 'object' ? order.payment_status_id.ps_name : 'Unknown'}
-                            </span>
+                            <PaymentStatusCell
+                              paymentStatus={order.payment_status_id}
+                              paymentMethodId={order.pm_id}
+                              payosOrderCode={order.payos_order_code}
+                            />
                           ) : (
                             <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium border bg-gray-100 text-gray-800 border-gray-200">
                               Chưa có trạng thái
@@ -543,9 +546,11 @@ export default function AdminOrdersPage() {
                         Trạng thái thanh toán
                       </label>
                       {order.payment_status_id ? (
-                        <span className="inline-flex px-3 py-2 rounded-lg text-sm font-medium border bg-blue-100 text-blue-800 border-blue-200">
-                          {typeof order.payment_status_id === 'object' ? order.payment_status_id.ps_name : 'Unknown'}
-                        </span>
+                        <PaymentStatusCell
+                          paymentStatus={order.payment_status_id}
+                          paymentMethodId={order.pm_id}
+                          payosOrderCode={order.payos_order_code}
+                        />
                       ) : (
                         <span className="inline-flex px-3 py-2 rounded-lg text-sm font-medium border bg-gray-100 text-gray-800 border-gray-200">
                           Chưa có trạng thái

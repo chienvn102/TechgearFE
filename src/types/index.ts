@@ -112,6 +112,8 @@ export interface Order {
     ps_description: string;
   };
   order_total: number;
+  payment_transaction_id?: string | null;
+  payos_order_code?: number | null;
   product_orders?: ProductOrder[];
   payment_method?: PaymentMethod;
   payment_status?: PaymentStatus;

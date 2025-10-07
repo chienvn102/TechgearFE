@@ -49,9 +49,12 @@ export const SafeImage: React.FC<SafeImageProps> = ({
     ? getProductImageUrl(imageSrc, width, height, 'fill')
     : imageSrc;
 
+  // Ensure we always have a valid src
+  const finalSrc = optimizedSrc && optimizedSrc.trim() ? optimizedSrc : fallbackSrc;
+
   return (
     <img
-      src={optimizedSrc}
+      src={finalSrc}
       alt={alt}
       className={className}
       onError={handleError}

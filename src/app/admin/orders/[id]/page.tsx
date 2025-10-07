@@ -17,6 +17,7 @@ import {
 import { orderService } from '@/features/orders/services/orderService';
 import type { Order } from '@/features/orders/services/orderService';
 import { SafeImage } from '@/shared/components/ui/SafeImage';
+import { PaymentStatusDisplay } from '@/components/PaymentStatusDisplay';
 // Removed getProductImageUrls import - using SafeImage instead
 
 export default function OrderDetailPage() {
@@ -403,22 +404,13 @@ export default function OrderDetailPage() {
                 </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái thanh toán</label>
-                <span
-                  className="inline-flex px-3 py-1 rounded-full text-sm font-medium border w-full justify-center"
-                  style={{
-                    backgroundColor: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code + '20' : '#f3f4f6'),
-                    color: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code : '#374151'),
-                    borderColor: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code + '40' : '#d1d5db')
-                  }}
-                >
-                  {typeof order.payment_status_id === 'object' && order.payment_status_id?.ps_name ? order.payment_status_id.ps_name : (typeof order.payment_status_id === 'string' ? order.payment_status_id : 'N/A')}
-                </span>
-                {typeof order.payment_status_id === 'object' && order.payment_status_id?.ps_description && (
-                  <p className="text-xs text-gray-600 mt-1">{order.payment_status_id.ps_description}</p>
-                )}
-              </div>
+              {/* Payment Status - Auto-detect PayOS or Database status */}
+              <PaymentStatusDisplay
+                orderId={order._id || order.od_id || orderId}
+                paymentMethodId={order.pm_id}
+                paymentStatus={order.payment_status_id}
+                payosOrderCode={order.payos_order_code}
+              />
             </div>
           </motion.div>
 

@@ -88,6 +88,9 @@ export interface Order {
     cloudinary_secure_url?: string;
     storage_type?: string;
   }>;
+  // PayOS Integration fields
+  payment_transaction_id?: string | null;
+  payos_order_code?: number | null;
   ranking_discount?: number;
   created_at?: string;
   updated_at?: string;

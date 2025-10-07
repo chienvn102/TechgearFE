@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 interface SafeImageProps {
-  src: string;
+  src: string | undefined | null;
   alt: string;
   width?: number;
   height?: number;
@@ -24,7 +24,7 @@ export default function SafeImage({
   priority = false,
   fallbackSrc = '/images/placeholder.svg'
 }: SafeImageProps) {
-  const [imgSrc, setImgSrc] = useState(src);
+  const [imgSrc, setImgSrc] = useState(src || fallbackSrc);
   const [hasError, setHasError] = useState(false);
 
   const handleError = () => {
@@ -40,19 +40,20 @@ export default function SafeImage({
   // Validate and normalize URL before rendering
   let validSrc = imgSrc;
   try {
-    if (imgSrc) {
-      // Handle local files that don't start with /
-      if (!imgSrc.startsWith('data:') && !imgSrc.startsWith('/') && !imgSrc.startsWith('http')) {
-        validSrc = fallbackSrc;
-      }
-      // Test if it's a valid URL for external links
-      else if (imgSrc.startsWith('http')) {
-        new URL(imgSrc); // This will throw if invalid
-        }
-    } else {
+    // If no src or empty string, use fallback immediately
+    if (!imgSrc || imgSrc.trim() === '') {
       validSrc = fallbackSrc;
     }
+    // Handle local files that don't start with /
+    else if (!imgSrc.startsWith('data:') && !imgSrc.startsWith('/') && !imgSrc.startsWith('http')) {
+      validSrc = fallbackSrc;
+    }
+    // Test if it's a valid URL for external links
+    else if (imgSrc.startsWith('http')) {
+      new URL(imgSrc); // This will throw if invalid
+    }
   } catch (error) {
+    console.warn('Invalid image URL:', imgSrc, error);
     validSrc = fallbackSrc;
   }
 
