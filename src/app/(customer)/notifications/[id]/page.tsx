@@ -11,8 +11,6 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { notificationService, Notification } from '@/features/notifications/services/notificationService';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 
 export default function NotificationDetailPage() {
   const params = useParams();
@@ -113,48 +111,38 @@ export default function NotificationDetailPage() {
 
   if (loading) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 py-8">
-          <div className="max-w-3xl mx-auto px-4">
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-500 mt-4">Đang tải thông báo...</p>
-            </div>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-gray-500 mt-4">Đang tải thông báo...</p>
           </div>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   if (error || !notification) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 py-8">
-          <div className="max-w-3xl mx-auto px-4">
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <BellIcon className="h-16 w-16 text-red-400 mx-auto mb-4" />
-              <p className="text-red-600 text-lg">{error || 'Không tìm thấy thông báo'}</p>
-              <button
-                onClick={() => router.push('/')}
-                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Quay về trang chủ
-              </button>
-            </div>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+            <BellIcon className="h-16 w-16 text-red-400 mx-auto mb-4" />
+            <p className="text-red-600 text-lg">{error || 'Không tìm thấy thông báo'}</p>
+            <button
+              onClick={() => router.push('/')}
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Quay về trang chủ
+            </button>
           </div>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back button */}
         <motion.button
@@ -279,15 +267,13 @@ export default function NotificationDetailPage() {
           className="mt-6 text-center"
         >
           <button
-            onClick={() => router.push('/')}
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            ← Quay về trang chủ
-          </button>
-        </motion.div>
-      </div>
-      </div>
-      <Footer />
-    </>
+          onClick={() => router.push('/')}
+          className="text-blue-600 hover:text-blue-800 font-medium"
+        >
+          ← Quay về trang chủ
+        </button>
+      </motion.div>
+    </div>
+  </div>
   );
 }

@@ -10,8 +10,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { notificationService, Notification } from '@/features/notifications/services/notificationService';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 
 export default function CustomerNotificationsPage() {
   const router = useRouter();
@@ -149,10 +147,8 @@ export default function CustomerNotificationsPage() {
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -351,9 +347,7 @@ export default function CustomerNotificationsPage() {
             </nav>
           </motion.div>
         )}
-        </div>
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }

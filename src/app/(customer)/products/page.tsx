@@ -18,8 +18,6 @@ import { categoryService } from '@/features/categories/services/categoryService'
 import { productTypeService } from '@/features/product-types/services/productTypeService';
 import { playerService } from '@/features/players/services/playerService';
 import { Product, Brand, Category, ProductType, Player } from '@/types';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { SafeImage } from '@/shared/components/ui/SafeImage';
 import { useCart } from '@/contexts/CartContext';
 
@@ -208,12 +206,8 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <Header />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Filter Sidebar */}
+        <div className="flex gap-8">{/* Filter Sidebar */}
           <div className="w-64 flex-shrink-0">
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-center justify-between mb-6">
@@ -471,10 +465,7 @@ export default function ProductsPage() {
             )}
           </div>
         </div>
-        </div>
-
-      {/* Footer */}
-      <Footer />
+      </div>
       
       {/* Custom CSS for dual range slider */}
       <style jsx>{`
@@ -499,6 +490,6 @@ export default function ProductsPage() {
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
       `}</style>
-      </div>
+    </div>
   );
 }

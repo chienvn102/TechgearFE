@@ -130,6 +130,7 @@ class PaymentService {
       console.log('✅ Payment verified:', {
         status: response.data.data.status,
         payosStatus: response.data.data.payos_status,
+        fullData: response.data.data
       });
 
       return response.data;

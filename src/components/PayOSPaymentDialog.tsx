@@ -44,9 +44,9 @@ export default function PayOSPaymentDialog({
   const [paymentStatus, setPaymentStatus] = useState<PayOSStatus | null>(null);
   const [isTimeout, setIsTimeout] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [stopPolling, setStopPolling] = useState<(() => void) | null>(null);
   const [qrCodeImageUrl, setQrCodeImageUrl] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const stopPollingRef = useRef<(() => void) | null>(null);
 
   /**
    * Generate QR Code Image from QR data string
@@ -111,11 +111,22 @@ export default function PayOSPaymentDialog({
    */
   const handlePaymentUpdate = useCallback((response: VerifyPaymentResponse) => {
     const { payos_status, status } = response.data;
+    
+    console.log('🔄 Payment status update:', { payos_status, status });
+    
     setPaymentStatus(payos_status);
 
     // Payment completed
     if (payos_status === PayOSStatus.PAID && status === 'COMPLETED') {
       console.log('✅ Payment completed successfully');
+      setIsPolling(false);
+      
+      // Stop polling
+      if (stopPollingRef.current) {
+        stopPollingRef.current();
+        stopPollingRef.current = null;
+      }
+      
       setTimeout(() => {
         if (paymentData?.payos_order_code) {
           onSuccess(paymentData.payos_order_code);
@@ -128,6 +139,11 @@ export default function PayOSPaymentDialog({
       console.log('❌ Payment was cancelled');
       setError('Thanh toán đã bị hủy');
       setIsPolling(false);
+      
+      if (stopPollingRef.current) {
+        stopPollingRef.current();
+        stopPollingRef.current = null;
+      }
     }
 
     // Payment failed
@@ -135,63 +151,54 @@ export default function PayOSPaymentDialog({
       console.log('❌ Payment failed');
       setError('Thanh toán thất bại');
       setIsPolling(false);
+      
+      if (stopPollingRef.current) {
+        stopPollingRef.current();
+        stopPollingRef.current = null;
+      }
     }
-  }, [onSuccess]);
+  }, [onSuccess, paymentData?.payos_order_code]);
 
   /**
    * Start polling payment status
    */
   useEffect(() => {
-    if (isOpen && paymentData && !isPolling) {
-      console.log('🔄 Starting payment status polling...');
-      console.log('📱 Payment Data:', {
-        qr_code: paymentData.qr_code,
-        payment_link: paymentData.payment_link,
-        order_code: paymentData.payos_order_code
-      });
-      
-      setIsPolling(true);
-      setPaymentStatus(null);
-      setError(null);
+    if (!isOpen || !paymentData || isPolling) return;
+    
+    console.log('🔄 Starting payment status polling...');
+    console.log('📱 Payment Data:', {
+      qr_code: paymentData.qr_code?.substring(0, 50) + '...',
+      payment_link: paymentData.payment_link,
+      order_code: paymentData.payos_order_code
+    });
+    
+    setIsPolling(true);
+    setPaymentStatus(null);
+    setError(null);
+    setIsTimeout(false);
+    setCountdown(900); // Reset countdown
 
-      const stop = paymentService.pollPaymentStatus(
-        paymentData.payos_order_code,
-        handlePaymentUpdate,
-        3000 // Poll every 3 seconds
-      );
+    // Start polling (returns stop function synchronously)
+    const stopFn = paymentService.pollPaymentStatus(
+      paymentData.payos_order_code,
+      handlePaymentUpdate,
+      3000 // Poll every 3 seconds
+    );
 
-      stop.then((stopFn) => {
-        setStopPolling(() => stopFn);
-      });
-    }
+    // Store stop function
+    stopFn.then((stop) => {
+      stopPollingRef.current = stop;
+    });
 
+    // Cleanup on unmount or when dialog closes
     return () => {
-      if (stopPolling) {
-        stopPolling();
-        setStopPolling(null);
+      if (stopPollingRef.current) {
+        console.log('🛑 Stopping payment polling (cleanup)');
+        stopPollingRef.current();
+        stopPollingRef.current = null;
       }
     };
-  }, [isOpen, paymentData, isPolling, handlePaymentUpdate, stopPolling]);
-
-  /**
-   * Countdown timer
-   */
-  useEffect(() => {
-    if (!isOpen || !isPolling) return;
-
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          setError('Hết thời gian thanh toán');
-          setIsPolling(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isOpen, isPolling]);
+  }, [isOpen, paymentData, handlePaymentUpdate]);
 
   /**
    * Open payment link in new tab
@@ -206,13 +213,16 @@ export default function PayOSPaymentDialog({
    * Handle close dialog
    */
   const handleClose = () => {
-    if (stopPolling) {
-      stopPolling();
+    if (stopPollingRef.current) {
+      console.log('🛑 Stopping polling on close');
+      stopPollingRef.current();
+      stopPollingRef.current = null;
     }
     setIsPolling(false);
-    setCountdown(600);
+    setCountdown(900);
     setPaymentStatus(null);
     setError(null);
+    setIsTimeout(false);
     onClose();
   };
 
