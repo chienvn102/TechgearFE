@@ -18,6 +18,7 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import Header from '../../../components/Header';
 import { SafeImage } from '@/shared/components/ui/SafeImage';
 import { useCart } from '@/contexts/CartContext';
+import { ProductReviews } from '@/features/reviews/components';
 
 interface ProductImage {
   img: string;
@@ -402,6 +403,11 @@ export default function ProductDetailPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-12">
+          <ProductReviews productId={params.id as string} />
         </div>
       </div>
     </div>

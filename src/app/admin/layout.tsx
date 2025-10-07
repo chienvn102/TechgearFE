@@ -21,6 +21,7 @@ import {
   KeyIcon,
   ChartBarIcon,
   Cog6ToothIcon,
+  ClockIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   HomeIcon,
@@ -46,11 +47,9 @@ const navItems = [
   { href: '/admin/banners', label: 'Banners', icon: PhotoIcon },
   { href: '/admin/posts', label: 'Posts', icon: NewspaperIcon },
   { href: '/admin/notifications', label: 'Notifications', icon: BellIcon },
-  { href: '/admin/users', label: 'Users', icon: IdentificationIcon },
-  { href: '/admin/roles', label: 'Roles', icon: ShieldCheckIcon },
-  { href: '/admin/permissions', label: 'Permissions', icon: KeyIcon },
+  { href: '/admin/users-management', label: 'Users & Roles', icon: ShieldCheckIcon },
   { href: '/admin/analytics', label: 'Analytics', icon: ChartBarIcon },
-  { href: '/admin/settings', label: 'Settings', icon: Cog6ToothIcon },
+  { href: '/admin/audit-trail', label: 'Lịch sử hoạt động', icon: ClockIcon },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

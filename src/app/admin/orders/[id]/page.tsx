@@ -42,6 +42,9 @@ export default function OrderDetailPage() {
       const response = await orderService.getOrderById(orderId);
       
       if (response && response.success && response.data) {
+        console.log('🔍 Order data structure:', response.data);
+        console.log('🔍 po_id type:', typeof response.data.po_id);
+        console.log('🔍 po_id value:', response.data.po_id);
         setOrder(response.data);
       } else {
         throw new Error(response?.message || 'Order not found');
@@ -136,12 +139,12 @@ export default function OrderDetailPage() {
           <span
             className="inline-flex px-3 py-1 rounded-full text-sm font-medium border"
             style={{
-              backgroundColor: order.payment_status_id.color_code + '20',
-              color: order.payment_status_id.color_code,
-              borderColor: order.payment_status_id.color_code + '40'
+              backgroundColor: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code + '20' : '#f3f4f6'),
+              color: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code : '#374151'),
+              borderColor: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code + '40' : '#d1d5db')
             }}
           >
-            {order.payment_status_id.ps_name}
+            {typeof order.payment_status_id === 'object' && order.payment_status_id?.ps_name ? order.payment_status_id.ps_name : (typeof order.payment_status_id === 'string' ? order.payment_status_id : 'N/A')}
           </span>
         </div>
       </div>
@@ -170,7 +173,7 @@ export default function OrderDetailPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Ngày đặt hàng</label>
                 <div className="flex items-center text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
                   <CalendarDaysIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  {new Date(order.order_datetime).toLocaleString('vi-VN')}
+                  {order.order_datetime ? new Date(order.order_datetime).toLocaleString('vi-VN') : 'N/A'}
                 </div>
               </div>
               
@@ -183,8 +186,15 @@ export default function OrderDetailPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mã sản phẩm</label>
-                <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{order.po_id}</p>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mã Product Order</label>
+                <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                  {(() => {
+                    if (typeof order.po_id === 'string') return order.po_id;
+                    if (Array.isArray(order.po_id)) return order.po_id.map(p => p._id).join(', ');
+                    if (typeof order.po_id === 'object' && order.po_id?._id) return order.po_id._id;
+                    return 'N/A';
+                  })()}
+                </p>
               </div>
             </div>
 
@@ -214,21 +224,27 @@ export default function OrderDetailPage() {
                 <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{order.customer_name}</p>
               </div>
               
-              {order.customer_id && (
+              {order.customer_id && typeof order.customer_id === 'object' && (
                 <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{order.customer_id.c_email}</p>
+                    <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                      {order.customer_id.email || 'N/A'}
+                    </p>
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-                    <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{order.customer_id.c_phone}</p>
+                    <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                      {order.customer_id.phone_number || 'N/A'}
+                    </p>
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">ID khách hàng</label>
-                    <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{order.customer_id._id}</p>
+                    <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                      {order.customer_id._id || order.customer_id.customer_id || 'N/A'}
+                    </p>
                   </div>
                 </>
               )}
@@ -236,92 +252,108 @@ export default function OrderDetailPage() {
           </motion.div>
 
           {/* Product Information */}
-          {order.po_id && order.po_id.pd_id && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-            >
-              <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <TagIcon className="h-5 w-5 mr-2" />
-                Thông tin sản phẩm
-              </h2>
-              
-              <div className="flex gap-4">
-                {/* Product Image */}
-                <div className="flex-shrink-0">
-                  {order.product_images && order.product_images.length > 0 ? (
-                    <SafeImage
-                      src={order.product_images[0].cloudinary_secure_url || order.product_images[0].img}
-                      alt={order.po_id.pd_id.pd_name}
-                      width={120}
-                      height={120}
-                      className="w-30 h-30 rounded-lg object-cover border border-gray-200"
-                      crop="fit"
-                    />
-                  ) : (
-                    <div className="w-30 h-30 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-                      <span className="text-2xl">📦</span>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Product Details */}
-                <div className="flex-1 space-y-2">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tên sản phẩm</label>
-                    <p className="text-sm font-semibold text-gray-900">{order.po_id.pd_id.pd_name}</p>
-                  </div>
+          {order.po_id && (() => {
+            // Normalize po_id to always be an array for consistent rendering
+            const productOrders = Array.isArray(order.po_id) ? order.po_id : [order.po_id];
+            
+            return productOrders.map((productOrder, index) => (
+              productOrder && typeof productOrder === 'object' && productOrder.pd_id && typeof productOrder.pd_id === 'object' && (
+                <motion.div
+                  key={productOrder._id || index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + (index * 0.1) }}
+                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+                >
+                  <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                    <TagIcon className="h-5 w-5 mr-2" />
+                    Thông tin sản phẩm {productOrders.length > 1 ? `(${index + 1}/${productOrders.length})` : ''}
+                  </h2>
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Mã sản phẩm</label>
-                      <p className="text-sm text-gray-900 bg-gray-50 px-3 py-1 rounded">{order.po_id.pd_id.pd_id}</p>
+                  <div className="flex gap-4">
+                    {/* Product Image */}
+                    <div className="flex-shrink-0">
+                      {order.product_images && order.product_images.length > 0 ? (
+                        <SafeImage
+                          src={order.product_images[0].cloudinary_secure_url || order.product_images[0].img}
+                          alt={productOrder.pd_id.pd_name || 'Product image'}
+                          width={120}
+                          height={120}
+                          className="w-30 h-30 rounded-lg object-cover border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-30 h-30 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                          <span className="text-2xl">📦</span>
+                        </div>
+                      )}
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Thương hiệu</label>
-                      <p className="text-sm text-gray-900 bg-gray-50 px-3 py-1 rounded">{order.po_id.pd_id.br_id?.br_name || 'N/A'}</p>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Loại sản phẩm</label>
-                      <p className="text-sm text-gray-900 bg-gray-50 px-3 py-1 rounded">{order.po_id.pd_id.pdt_id?.pdt_name || 'N/A'}</p>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Danh mục</label>
-                      <p className="text-sm text-gray-900 bg-gray-50 px-3 py-1 rounded">{order.po_id.pd_id.category_id?.cg_name || 'N/A'}</p>
+                    {/* Product Details */}
+                    <div className="flex-1 space-y-2">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Tên sản phẩm</label>
+                        <p className="text-sm font-semibold text-gray-900">{productOrder.pd_id.pd_name || 'N/A'}</p>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Mã sản phẩm</label>
+                          <p className="text-sm text-gray-900 bg-gray-50 px-3 py-1 rounded">{productOrder.pd_id.pd_id || 'N/A'}</p>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Thương hiệu</label>
+                          <p className="text-sm text-gray-900 bg-gray-50 px-3 py-1 rounded">
+                            {(typeof productOrder.pd_id.br_id === 'object' && productOrder.pd_id.br_id?.br_name) || 
+                             (typeof productOrder.pd_id.br_id === 'string' ? productOrder.pd_id.br_id : 'N/A')}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Loại sản phẩm</label>
+                          <p className="text-sm text-gray-900 bg-gray-50 px-3 py-1 rounded">
+                            {(typeof productOrder.pd_id.pdt_id === 'object' && productOrder.pd_id.pdt_id?.pdt_name) || 
+                             (typeof productOrder.pd_id.pdt_id === 'string' ? productOrder.pd_id.pdt_id : 'N/A')}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Danh mục</label>
+                          <p className="text-sm text-gray-900 bg-gray-50 px-3 py-1 rounded">
+                            {(typeof productOrder.pd_id.category_id === 'object' && productOrder.pd_id.category_id?.cg_name) || 
+                             (typeof productOrder.pd_id.category_id === 'string' ? productOrder.pd_id.category_id : 'N/A')}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Số lượng đặt</label>
+                          <p className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded">{productOrder.po_quantity || 0}</p>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Giá đơn vị</label>
+                          <p className="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded">
+                            {(productOrder.po_price || 0).toLocaleString('vi-VN')}đ
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {productOrder.pd_id.pd_description && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+                          <p className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded line-clamp-2">
+                            {productOrder.pd_id.pd_description || 'Không có mô tả'}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Số lượng đặt</label>
-                      <p className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded">{order.po_id.po_quantity}</p>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Giá đơn vị</label>
-                      <p className="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded">
-                        {order.po_id.po_price.toLocaleString('vi-VN')}đ
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {order.po_id.pd_id.pd_description && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-                      <p className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded line-clamp-2">
-                        {order.po_id.pd_id.pd_description}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
+                </motion.div>
+              )
+            ));
+          })()}
 
           {/* Shipping Information */}
           <motion.div
@@ -362,8 +394,10 @@ export default function OrderDetailPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phương thức thanh toán</label>
                 <div className="bg-gray-50 px-3 py-2 rounded-lg">
-                  <p className="text-sm font-medium text-gray-900">{order.pm_id.pm_name}</p>
-                  {order.pm_id.pm_description && (
+                  <p className="text-sm font-medium text-gray-900">
+                    {typeof order.pm_id === 'object' && order.pm_id?.pm_name ? order.pm_id.pm_name : (typeof order.pm_id === 'string' ? order.pm_id : 'N/A')}
+                  </p>
+                  {typeof order.pm_id === 'object' && order.pm_id?.pm_description && (
                     <p className="text-xs text-gray-600 mt-1">{order.pm_id.pm_description}</p>
                   )}
                 </div>
@@ -374,14 +408,14 @@ export default function OrderDetailPage() {
                 <span
                   className="inline-flex px-3 py-1 rounded-full text-sm font-medium border w-full justify-center"
                   style={{
-                    backgroundColor: order.payment_status_id.color_code + '20',
-                    color: order.payment_status_id.color_code,
-                    borderColor: order.payment_status_id.color_code + '40'
+                    backgroundColor: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code + '20' : '#f3f4f6'),
+                    color: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code : '#374151'),
+                    borderColor: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code + '40' : '#d1d5db')
                   }}
                 >
-                  {order.payment_status_id.ps_name}
+                  {typeof order.payment_status_id === 'object' && order.payment_status_id?.ps_name ? order.payment_status_id.ps_name : (typeof order.payment_status_id === 'string' ? order.payment_status_id : 'N/A')}
                 </span>
-                {order.payment_status_id.ps_description && (
+                {typeof order.payment_status_id === 'object' && order.payment_status_id?.ps_description && (
                   <p className="text-xs text-gray-600 mt-1">{order.payment_status_id.ps_description}</p>
                 )}
               </div>
@@ -389,7 +423,7 @@ export default function OrderDetailPage() {
           </motion.div>
 
           {/* Voucher Information */}
-          {order.voucher_id && (
+          {order.voucher_id && typeof order.voucher_id === 'object' && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -404,13 +438,15 @@ export default function OrderDetailPage() {
               <div className="space-y-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tên voucher</label>
-                  <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{order.voucher_id.voucher_name}</p>
+                  <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                    {order.voucher_id.voucher_name || 'N/A'}
+                  </p>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Giảm giá</label>
                   <p className="text-sm text-green-600 font-semibold bg-green-50 px-3 py-2 rounded-lg">
-                    -{order.voucher_id.discount_amount.toLocaleString('vi-VN')}đ
+                    -{(order.voucher_id.discount_amount || 0).toLocaleString('vi-VN')}đ
                   </p>
                 </div>
               </div>
@@ -435,7 +471,7 @@ export default function OrderDetailPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-900">Đơn hàng được tạo</p>
                   <p className="text-xs text-gray-500">
-                    {new Date(order.created_at).toLocaleString('vi-VN')}
+                    {order.created_at ? new Date(order.created_at).toLocaleString('vi-VN') : 'N/A'}
                   </p>
                 </div>
               </div>
@@ -446,7 +482,7 @@ export default function OrderDetailPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-900">Cập nhật gần nhất</p>
                     <p className="text-xs text-gray-500">
-                      {new Date(order.updated_at).toLocaleString('vi-VN')}
+                      {order.updated_at ? new Date(order.updated_at).toLocaleString('vi-VN') : 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -472,7 +508,7 @@ export default function OrderDetailPage() {
               </button>
               
               <button
-                onClick={() => router.push(`/admin/customers/${order.customer_id?._id}`)}
+                onClick={() => router.push(`/admin/customers/${typeof order.customer_id === 'object' && order.customer_id?._id ? order.customer_id._id : order.customer_id}`)}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 disabled={!order.customer_id}
               >

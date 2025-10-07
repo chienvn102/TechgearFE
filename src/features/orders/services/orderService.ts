@@ -12,6 +12,7 @@ export interface OrderProduct {
     pd_id: string;
     pd_name: string;
     pd_price: number;
+    pd_description?: string;
     br_id?: {
       _id: string;
       br_id: string;
@@ -58,12 +59,14 @@ export interface Order {
     pm_id: string;
     pm_name: string;
     pm_img?: string;
+    pm_description?: string;
   };
   payment_status_id: {
     _id: string;
     ps_id: string;
     ps_name: string;
     ps_description?: string;
+    color_code?: string;
   };
   voucher_id?: {
     _id: string;
@@ -86,6 +89,8 @@ export interface Order {
     storage_type?: string;
   }>;
   ranking_discount?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface OrdersResponse {

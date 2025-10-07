@@ -20,11 +20,13 @@ import {
   BuildingStorefrontIcon,
   InformationCircleIcon,
   PhoneIcon,
-  TrophyIcon
+  TrophyIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 import { useCart } from '../contexts/CartContext';
 import { CartDialog } from './CartDialog';
 import { authService } from '@/features/auth/services/authService';
+import { NotificationDropdown } from '@/features/notifications/components/NotificationDropdown';
 
 export default function Header() {
   const router = useRouter();
@@ -209,6 +211,11 @@ export default function Header() {
               </span>
             </Link>
 
+            {/* Notifications - Only show for authenticated customers */}
+            {isAuthenticated && userType === 'customer' && (
+              <NotificationDropdown />
+            )}
+
             {/* Cart */}
             <button 
               onClick={openCart}
@@ -310,6 +317,14 @@ export default function Header() {
                         >
                           <UserGroupIcon className="w-4 h-4 mr-2" />
                           Quản lý khách hàng
+                        </Link>
+                        <Link
+                          href="/admin/audit-trail"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <ClockIcon className="w-4 h-4 mr-2" />
+                          Lịch sử hoạt động
                         </Link>
                       </>
                     )}

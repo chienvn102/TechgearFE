@@ -169,7 +169,7 @@ export default function AdminProductsList({ className }: AdminProductsListProps)
                   Giá
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                  Tồn kho
+                  Số lượng
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Trạng thái
@@ -230,7 +230,7 @@ export default function AdminProductsList({ className }: AdminProductsListProps)
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap hidden lg:table-cell">
                     <div className="text-sm text-gray-900">
-                      {product.stock_quantity}
+                      {product.pd_quantity || 0}
                     </div>
                     <div className="text-xs text-gray-500">
                       Màu: {product.color}

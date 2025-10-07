@@ -14,7 +14,8 @@ import {
   ChartBarIcon,
   CogIcon,
   ShoppingCartIcon,
-  GiftIcon
+  GiftIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 
 const menuItems = [
@@ -68,12 +69,16 @@ const menuItems = [
     icon: ChartBarIcon,
   },
   {
+    title: 'Lịch sử hoạt động',
+    href: '/admin/audit-trail',
+    icon: ClockIcon,
+  },
+  {
     title: 'Quản trị',
     icon: CogIcon,
     children: [
       { title: 'Người dùng', href: '/admin/users' },
       { title: 'Vai trò & Quyền', href: '/admin/roles' },
-      { title: 'Audit Trail', href: '/admin/audit-trail' },
     ],
   },
 ];

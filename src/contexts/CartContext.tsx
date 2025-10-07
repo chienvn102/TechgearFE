@@ -118,28 +118,43 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
     setItems(prevItems => {
-      if (!Array.isArray(prevItems)) return [{ ...newItem, quantity: 1, selected: true }];
+      if (!Array.isArray(prevItems)) {
+        const newItems = [{ ...newItem, quantity: 1, selected: true }];
+        localStorage.setItem('cart', JSON.stringify(newItems));
+        return newItems;
+      }
       
       const existingItem = prevItems.find(item => 
         item._id === newItem._id && item.color === newItem.color
       );
 
+      let newItems;
       if (existingItem) {
-        return prevItems.map(item =>
+        newItems = prevItems.map(item =>
           item._id === newItem._id && item.color === newItem.color
             ? { ...item, quantity: item.quantity + 1, selected: true }
             : item
         );
       } else {
-        return [...prevItems, { ...newItem, quantity: 1, selected: true }];
+        newItems = [...prevItems, { ...newItem, quantity: 1, selected: true }];
       }
+      
+      // ✅ Immediately save to localStorage to prevent data loss on F5
+      localStorage.setItem('cart', JSON.stringify(newItems));
+      
+      return newItems;
     });
   };
 
   const removeItem = (itemId: string) => {
     setItems(prevItems => {
       if (!Array.isArray(prevItems)) return [];
-      return prevItems.filter(item => item._id !== itemId);
+      const newItems = prevItems.filter(item => item._id !== itemId);
+      
+      // ✅ Immediately save to localStorage to prevent data loss on F5
+      localStorage.setItem('cart', JSON.stringify(newItems));
+      
+      return newItems;
     });
   };
 
@@ -149,9 +164,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     } else {
       setItems(prevItems => {
         if (!Array.isArray(prevItems)) return [];
-        return prevItems.map(item =>
+        const newItems = prevItems.map(item =>
           item._id === itemId ? { ...item, quantity } : item
         );
+        
+        // ✅ Immediately save to localStorage to prevent data loss on F5
+        localStorage.setItem('cart', JSON.stringify(newItems));
+        
+        return newItems;
       });
     }
   };
@@ -159,13 +179,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const clearCart = () => {
     setIsClearing(true);
     setItems([]);
-    // Clear from localStorage immediately
-    localStorage.removeItem('cart');
+    
+    // ✅ Clear from localStorage immediately
+    localStorage.setItem('cart', JSON.stringify([]));
+    
     // Clear from server if logged in (async)
     if (authService.isAuthenticated()) {
-      // Save empty cart to server
-      localStorage.setItem('cart', JSON.stringify([]));
-      }
+      saveCartToServer();
+    }
     
     // Reset clearing flag after a short delay
     setTimeout(() => {
@@ -221,9 +242,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const toggleItemSelection = (itemId: string) => {
     setItems(prevItems => {
       if (!Array.isArray(prevItems)) return [];
-      return prevItems.map(item =>
+      const newItems = prevItems.map(item =>
         item._id === itemId ? { ...item, selected: !item.selected } : item
       );
+      
+      // ✅ Immediately save to localStorage
+      localStorage.setItem('cart', JSON.stringify(newItems));
+      
+      return newItems;
     });
   };
 
