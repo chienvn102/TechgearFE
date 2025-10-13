@@ -45,7 +45,7 @@ export default function MyRankingPage() {
         // Check if user is logged in
         const user = authService.getCurrentUser();
         if (!user) {
-          router.push('/login');
+          window.location.href = 'http://localhost:5000/login';
           return;
         }
 
@@ -54,13 +54,15 @@ export default function MyRankingPage() {
         if (customerResponse.success && customerResponse.data.customer) {
           const customer = customerResponse.data.customer;
           
-          // Get actual total spending from orders
+          // Get actual total spending from PAID orders only
           const ordersResponse = await orderService.getMyOrders();
           if (ordersResponse.success && ordersResponse.data.orders) {
-            const totalSpending = ordersResponse.data.orders.reduce((sum: number, order: any) => 
-              sum + (order.order_total || 0), 0);
+            // Filter only PAID orders and sum their totals
+            const totalSpending = ordersResponse.data.orders
+              .filter((order: any) => order.payment_status_id?.ps_id === 'PAID')
+              .reduce((sum: number, order: any) => sum + (order.order_total || 0), 0);
             setActualTotalSpending(totalSpending);
-            }
+          }
           
           // Get customer ranking from API
           const rankingResponse = await customerRankingService.getCustomerRankings(customer._id);
@@ -375,15 +377,10 @@ export default function MyRankingPage() {
           {/* Spending Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Tổng chi tiêu thực tế</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Tổng chi tiêu (Đơn đã thanh toán)</h3>
               <p className="text-2xl font-bold text-gray-900">
                 {formatCurrency(actualTotalSpending)}
               </p>
-              {actualTotalSpending !== customerRanking.total_spending && (
-                <p className="text-xs text-red-600 mt-1">
-                  (Database: {formatCurrency(customerRanking.total_spending)})
-                </p>
-              )}
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Mức ranking hiện tại</h3>

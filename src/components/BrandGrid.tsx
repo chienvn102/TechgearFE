@@ -188,8 +188,8 @@ export default function BrandGrid({
           ))}
         </div>
 
-        {/* View All Brands Button */}
-        <div className="text-center mt-12">
+        {/* View All Brands Button - ĐÃ BỎ */}
+        {/* <div className="text-center mt-12">
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -199,7 +199,7 @@ export default function BrandGrid({
           >
             Xem tất cả thương hiệu
           </motion.button>
-        </div>
+        </div> */}
       </div>
     </section>
   );

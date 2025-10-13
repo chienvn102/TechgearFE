@@ -60,14 +60,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   useEffect(() => {
     if (!authService.isAuthenticated() || !authService.isAdmin()) {
-      router.replace('/login');
+      window.location.href = 'http://localhost:5000/login';
     }
     setMounted(true);
   }, [router]);
 
   const handleLogout = async () => {
     await authService.logout();
-    router.replace('/login');
+    window.location.href = 'http://localhost:5000/login';
   };
 
   if (!mounted) {

@@ -214,10 +214,14 @@ export default function CheckoutPage() {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.data && data.data.paymentMethods) {
-          setPaymentMethods(data.data.paymentMethods);
+          // Filter: Chỉ giữ COD và PayOS (Chuyển khoản ngân hàng)
+          const allowedMethods = data.data.paymentMethods.filter((method: any) => 
+            method.pm_id === 'COD' || method.pm_id === 'PAYOS'
+          );
+          setPaymentMethods(allowedMethods);
           // Auto-select first payment method if available
-          if (data.data.paymentMethods.length > 0) {
-            setValue('payment_method_id', data.data.paymentMethods[0]._id);
+          if (allowedMethods.length > 0) {
+            setValue('payment_method_id', allowedMethods[0]._id);
           }
         }
       }
@@ -379,16 +383,9 @@ export default function CheckoutPage() {
             
             const paymentResponse = await paymentService.createPayOSPayment({
               order_id: result.data.order._id,
-              payment_method_id: data.payment_method_id,
-              amount: finalTotal,
-              buyer_name: data.customer_name,
-              buyer_email: data.email || 'guest@example.com',
-              buyer_phone: data.phone_number,
-              items: cartItems.map((item) => ({
-                name: item.pd_name,
-                quantity: item.quantity,
-                price: item.pd_price
-              }))
+              customer_name: data.customer_name,
+              customer_email: data.email || 'guest@example.com',
+              customer_phone: data.phone_number
             });
 
             if (paymentResponse.success && paymentResponse.data) {
@@ -456,16 +453,18 @@ export default function CheckoutPage() {
   };
 
   // PayOS payment handlers
-  const handlePayOSSuccess = (orderId: string) => {
+  const handlePayOSSuccess = (orderCode: number) => {
+    console.log('✅ PayOS payment success, orderCode:', orderCode);
+    
     // Close dialog
     setShowPayOSDialog(false);
     
     // Clear cart
     clearCart();
     
-    // Redirect to order detail using the orderId from payment confirmation
-    if (orderId && orderData && orderData.order) {
-      router.push(`/orders/${orderData.order.od_id}`);
+    // Redirect to order detail using the order data we created
+    if (orderData && orderData.order) {
+      router.push(`/orders/${orderData.order._id}`);
     }
   };
 
@@ -473,6 +472,33 @@ export default function CheckoutPage() {
     setShowPayOSDialog(false);
     setPayosPaymentData(null);
     setError('Thanh toán đã bị hủy. Bạn có thể thử lại.');
+  };
+
+  const handlePayOSTimeout = async () => {
+    console.log('⏰ Payment timeout - cancelling order');
+    
+    setShowPayOSDialog(false);
+    setPayosPaymentData(null);
+    
+    // Cancel the order
+    if (orderData && orderData.order && payosPaymentData) {
+      try {
+        // Call backend to cancel payment and update order status
+        await paymentService.cancelPayment(payosPaymentData.payos_order_code, {
+          cancellationReason: 'Hết thời gian thanh toán (15 phút)'
+        });
+        
+        setError('Đơn hàng đã bị hủy do hết thời gian thanh toán. Vui lòng đặt hàng lại.');
+        
+        // Redirect to home after 3 seconds
+        setTimeout(() => {
+          router.push('/');
+        }, 3000);
+      } catch (err) {
+        console.error('Error cancelling order:', err);
+        setError('Không thể hủy đơn hàng. Vui lòng liên hệ hỗ trợ.');
+      }
+    }
   };
 
   const isStepValid = (step: number) => {
@@ -980,6 +1006,7 @@ export default function CheckoutPage() {
           paymentData={payosPaymentData}
           onSuccess={handlePayOSSuccess}
           onCancel={handlePayOSCancel}
+          onTimeout={handlePayOSTimeout}
         />
       )}
     </div>

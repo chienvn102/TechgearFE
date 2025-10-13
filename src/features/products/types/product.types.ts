@@ -8,17 +8,21 @@ export interface Product {
   pd_price: number;
   pd_quantity: number;
   pd_note?: string;
-  pd_day_updated: string;
-  br_id: string | Brand;
-  pdt_id: string | ProductType;
-  category_id: string | Category;
-  player_id?: string | Player | null;
+  pd_day_updated?: string;
+  pd_description?: string;
+  br_id: string | Brand | { _id: string; br_id: string; br_name: string; };
+  pdt_id: string | ProductType | { _id: string; pdt_id: string; pdt_name: string; };
+  category_id?: string | Category | { _id: string; cg_id: string; cg_name: string; };
+  cg_id?: string | Category | { _id: string; cg_id: string; cg_name: string; }; // Alias cho category_id
+  player_id?: string | Player | { _id: string; player_id: string; player_name: string; } | null;
   product_description?: string;
-  stock_quantity: number;
+  stock_quantity?: number;
   is_available: boolean;
-  color: string;
-  sku: string;
+  is_active?: boolean;
+  color?: string; // Optional để tương thích với index.ts
+  sku?: string; // Optional để tương thích với index.ts và lib/api
   created_at: string;
+  updated_at?: string;
   images?: ProductImage[];
 }
 
@@ -80,12 +84,13 @@ export interface CreateProductData {
   pd_note?: string;
   br_id: string;
   pdt_id: string;
-  category_id: string;
+  category_id?: string;
   player_id?: string | null;
   product_description?: string;
-  stock_quantity: number;
+  pd_description?: string;
+  stock_quantity?: number;
   is_available?: boolean;
-  color: string;
+  color?: string; // Optional
   sku: string;
 }
 

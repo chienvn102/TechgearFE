@@ -33,7 +33,8 @@ export default function CartPage() {
     selectAllItems,
     deselectAllItems,
     getSelectedItems,
-    getSelectedTotal
+    getSelectedTotal,
+    requireAuth
   } = useCart();
   
   const handleClearCart = () => {
@@ -50,19 +51,15 @@ export default function CartPage() {
       return;
     }
     
-    if (!authService.isAuthenticated()) {
-      alert('Vui lòng đăng nhập để tiếp tục!');
-      router.push('/login');
-      return;
-    }
-    
-    try {
-      // Force navigation with page reload to ensure fresh state
-      window.location.href = '/checkout';
-    } catch (error) {
-      // Fallback
-      router.push('/checkout');
-    }
+    requireAuth(() => {
+      try {
+        // Force navigation with page reload to ensure fresh state
+        window.location.href = '/checkout';
+      } catch (error) {
+        // Fallback
+        router.push('/checkout');
+      }
+    }, 'tiến hành thanh toán');
   };
   
   if (loading) {

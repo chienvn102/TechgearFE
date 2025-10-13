@@ -72,7 +72,7 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('user_data');
             localStorage.removeItem('user');
             if (typeof window !== 'undefined') {
-              window.location.href = '/login';
+              window.location.href = 'http://localhost:5000/login';
             }
           } else {
             }

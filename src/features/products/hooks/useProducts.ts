@@ -3,6 +3,7 @@ import { productService } from '../services/productService';
 import { brandService } from '@/features/brands/services/brandService';
 import { categoryService } from '@/features/categories/services/categoryService';
 import { playerService } from '@/features/players/services/playerService';
+import { productTypeService } from '@/features/products/services/productTypeService';
 import type {
   Product,
   ProductFilters,
@@ -190,12 +191,17 @@ export function useProductMutation() {
     }
   }, []);
 
-  const uploadProductImage = useCallback(async (productId: string, file: File, color: string) => {
+  const uploadProductImage = useCallback(async (productId: string, file: File, color?: string) => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await productService.uploadProductImage(productId, file, color);
+      // Create FormData to match service signature
+      const formData = new FormData();
+      formData.append('image', file);
+      if (color) formData.append('color', color);
+      
+      const response = await productService.uploadProductImage(productId, formData);
       
       if (!response || !response.success) {
         const errorMsg = response?.message || 'Failed to upload image';
@@ -228,14 +234,20 @@ export function useProductMutation() {
     }
   }, []);
 
+  // ⚠️ Method setDefaultImage không tồn tại trong productService
+  // TODO: Implement nếu cần thiết
   const setDefaultImage = useCallback(async (imageId: string) => {
     setLoading(true);
     try {
-      const response = await productService.setDefaultImage(imageId);
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to set default image');
-      }
-      return response;
+      // Tạm thời không implement - method chưa có trong service
+      console.warn('setDefaultImage: Method not implemented in productService');
+      throw new Error('setDefaultImage method not available');
+      
+      // const response = await productService.setDefaultImage(imageId);
+      // if (!response.success) {
+      //   throw new Error(response.message || 'Failed to set default image');
+      // }
+      // return response;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
       throw err;
@@ -267,7 +279,7 @@ export function useBrands() {
       try {
         setLoading(true);
         setError(null);
-        const response = await productService.getBrands();
+        const response = await brandService.getBrands(); // ✅ Dùng brandService
         
         if (response.success) {
           setBrands(response.data.brands);
@@ -298,7 +310,7 @@ export function useCategories() {
       try {
         setLoading(true);
         setError(null);
-        const response = await productService.getCategories();
+        const response = await categoryService.getCategories(); // ✅ Dùng categoryService
         
         if (response.success) {
           setCategories(response.data.categories);
@@ -329,7 +341,7 @@ export function usePlayers() {
       try {
         setLoading(true);
         setError(null);
-        const response = await productService.getPlayers();
+        const response = await playerService.getPlayers(); // ✅ Dùng playerService
         
         if (response.success) {
           setPlayers(response.data.players);
@@ -360,7 +372,7 @@ export function useProductTypes() {
       try {
         setLoading(true);
         setError(null);
-        const response = await productService.getProductTypes();
+        const response = await productTypeService.getProductTypes(); // ✅ Dùng productTypeService
         
         if (response.success) {
           setProductTypes(response.data.productTypes);

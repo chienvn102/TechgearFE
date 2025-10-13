@@ -47,7 +47,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/players" className="text-gray-400 hover:text-white transition-colors">
-                  Cầu thủ
+                  Tuyển thủ
                 </Link>
               </li>
             </ul>

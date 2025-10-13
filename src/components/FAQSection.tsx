@@ -13,23 +13,23 @@ interface FAQItem {
 const faqData: FAQItem[] = [
   {
     id: '1',
-    question: 'Do you ship overseas?',
-    answer: 'Yes, we ship worldwide! We offer international shipping to most countries. Shipping costs and delivery times vary by location. Please check our shipping policy for more details.'
+    question: 'Bạn có giao hàng quốc tế không?',
+    answer: 'Có, chúng tôi giao hàng toàn cầu! Chúng tôi cung cấp dịch vụ giao hàng quốc tế đến hầu hết các quốc gia. Chi phí vận chuyển và thời gian giao hàng thay đổi tùy theo địa điểm. Vui lòng kiểm tra chính sách vận chuyển của chúng tôi để biết thêm chi tiết.'
   },
   {
     id: '2',
-    question: 'How long will it take to get my orders?',
-    answer: 'Domestic orders typically arrive within 2-3 business days. International orders may take 7-14 business days depending on your location and customs processing.'
+    question: 'Mất bao lâu để nhận được đơn hàng?',
+    answer: 'Đơn hàng trong nước thường đến trong vòng 2-3 ngày làm việc. Đơn hàng quốc tế có thể mất 7-14 ngày làm việc tùy thuộc vào vị trí của bạn và quá trình thông quan.'
   },
   {
     id: '3',
-    question: 'What is your warranty policy?',
-    answer: 'We offer a 12-month warranty on all products. Our warranty covers manufacturing defects and hardware issues. Please keep your receipt and contact our support team for warranty claims.'
+    question: 'Chính sách bảo hành của bạn như thế nào?',
+    answer: 'Chúng tôi cung cấp bảo hành 12 tháng cho tất cả sản phẩm. Bảo hành của chúng tôi bao gồm lỗi sản xuất và các vấn đề về phần cứng. Vui lòng giữ hóa đơn và liên hệ với đội ngũ hỗ trợ của chúng tôi để yêu cầu bảo hành.'
   },
   {
     id: '4',
-    question: 'Any question?',
-    answer: 'If you have any other questions, please don\'t hesitate to contact our customer support team. We\'re here to help you with any inquiries about our products, orders, or services.'
+    question: 'Còn câu hỏi nào khác?',
+    answer: 'Nếu bạn có bất kỳ câu hỏi nào khác, đừng ngần ngại liên hệ với đội ngũ hỗ trợ khách hàng của chúng tôi. Chúng tôi luôn sẵn sàng hỗ trợ bạn với mọi thắc mắc về sản phẩm, đơn hàng hoặc dịch vụ của chúng tôi.'
   }
 ];
 
@@ -57,16 +57,16 @@ export const FAQSection: React.FC = () => {
             className="space-y-6"
           >
             <h2 className="text-4xl font-bold text-gray-900 leading-tight">
-              Have a question? We are here to help.
+              Có câu hỏi? Chúng tôi luôn sẵn sàng hỗ trợ.
             </h2>
             
             <p className="text-lg text-gray-600 leading-relaxed">
-              Check out the most common questions our customers asked. Still have questions? Contact our customer support.
+              Xem qua những câu hỏi thường gặp nhất mà khách hàng của chúng tôi đã hỏi. Vẫn còn thắc mắc? Hãy liên hệ với đội ngũ hỗ trợ khách hàng của chúng tôi.
             </p>
             
             <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
               <p className="text-blue-800 font-medium">
-                Our customer support is available Monday to Friday from 9 AM to 6:30 PM CST.
+                Đội ngũ hỗ trợ khách hàng của chúng tôi hoạt động từ Thứ Hai đến Thứ Sáu từ 9:00 đến 18:30 (giờ Việt Nam).
               </p>
             </div>
           </motion.div>

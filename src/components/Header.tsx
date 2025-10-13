@@ -148,7 +148,6 @@ export default function Header() {
     { href: '/products', label: 'Sản phẩm', icon: CubeIcon },
     { href: '/categories', label: 'Danh mục', icon: TagIcon },
     { href: '/brands', label: 'Thương hiệu', icon: BuildingStorefrontIcon },
-    { href: '/players', label: 'Tuyển thủ', icon: UserGroupIcon },
     { href: '/about', label: 'Giới thiệu', icon: InformationCircleIcon },
     { href: '/contact', label: 'Liên hệ', icon: PhoneIcon },
   ];

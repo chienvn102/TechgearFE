@@ -135,6 +135,7 @@ export interface Transaction {
  */
 export interface CreatePaymentRequest {
   order_id: string;
+  amount?: number; // Optional - backend sẽ tự tính từ order
   customer_name?: string;
   customer_email?: string;
   customer_phone?: string;

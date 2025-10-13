@@ -51,7 +51,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     // Check authentication
     if (!authService.isAuthenticated() || authService.getUserType() !== 'admin') {
-      router.push('/login');
+      window.location.href = 'http://localhost:5000/login';
       return;
     }
 
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
       if (err.message?.includes('401')) {
         setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
         authService.logout();
-        router.push('/login');
+        window.location.href = 'http://localhost:5000/login';
       } else if (err.message?.includes('403')) {
         setError('Bạn không có quyền truy cập trang này.');
       } else if (err.message?.includes('404')) {
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     authService.logout();
-    router.push('/login');
+    window.location.href = 'http://localhost:5000/login';
   };
 
   if (loading) {

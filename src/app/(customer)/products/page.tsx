@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -37,6 +37,7 @@ interface ProductFilters {
 
 export default function ProductsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { addItem, openCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -55,6 +56,24 @@ export default function ProductsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
   const [inStockOnly, setInStockOnly] = useState(false);
+
+  // Read URL params and set initial filters
+  useEffect(() => {
+    const productTypeParam = searchParams.get('productType');
+    const brandParam = searchParams.get('brand');
+    const playerParam = searchParams.get('player');
+    const categoryParam = searchParams.get('category');
+
+    // Set filters from URL params
+    // Note: We store the IDs (pdt_id, br_id, etc.) not _id
+    setFilters(prev => ({
+      ...prev,
+      pdt_id: productTypeParam || undefined,
+      br_id: brandParam || undefined,
+      player_id: playerParam || undefined,
+      category_id: categoryParam || undefined
+    }));
+  }, [searchParams]);
 
   // Load initial data
   useEffect(() => {
@@ -106,7 +125,8 @@ export default function ProductsPage() {
         setProducts(response.data.products || []);
       }
     } catch (error) {
-      } finally {
+      console.error('Error loading products:', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -131,10 +151,13 @@ export default function ProductsPage() {
     // Ensure min <= max
     const [min, max] = newRange[0] <= newRange[1] ? newRange : [newRange[1], newRange[0]];
     setPriceRange([min, max]);
+    
+    // Send price filter: only skip if both are default (0 and 10000000)
+    const isDefaultRange = min === 0 && max === 10000000;
     setFilters(prev => ({
       ...prev,
-      min_price: min,
-      max_price: max,
+      min_price: isDefaultRange ? undefined : min,
+      max_price: isDefaultRange ? undefined : max,
       page: 1
     }));
   };
@@ -241,47 +264,61 @@ export default function ProductsPage() {
                 </div>
                 
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="number"
-                      value={priceRange[0]}
-                      onChange={(e) => handlePriceRangeChange([Number(e.target.value), priceRange[1]])}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                      placeholder="Từ"
-                    />
-                    <span className="text-gray-500">-</span>
-                    <input
-                      type="number"
-                      value={priceRange[1]}
-                      onChange={(e) => handlePriceRangeChange([priceRange[0], Number(e.target.value)])}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                      placeholder="Đến"
-                    />
+                  {/* Display price range values */}
+                  <div className="flex items-center justify-between text-sm text-gray-700">
+                    <span>{priceRange[0].toLocaleString('vi-VN')}đ</span>
+                    <span>{priceRange[1].toLocaleString('vi-VN')}đ</span>
                   </div>
                   
-                  <div className="relative">
+                  {/* Dual range slider */}
+                  <div className="relative pt-1">
                     <div className="relative h-2 bg-gray-200 rounded-lg">
+                      {/* Min price slider */}
                       <input
                         type="range"
                         min="0"
                         max="10000000"
-                        step="100000"
+                        step="50000"
                         value={priceRange[0]}
                         onChange={(e) => handlePriceRangeChange([Number(e.target.value), priceRange[1]])}
                         className="absolute w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb"
-                        style={{ zIndex: priceRange[0] > priceRange[1] - 100000 ? 5 : 3 }}
+                        style={{ zIndex: priceRange[0] > priceRange[1] - 50000 ? 5 : 3 }}
                       />
+                      {/* Max price slider */}
                       <input
                         type="range"
                         min="0"
                         max="10000000"
-                        step="100000"
+                        step="50000"
                         value={priceRange[1]}
                         onChange={(e) => handlePriceRangeChange([priceRange[0], Number(e.target.value)])}
                         className="absolute w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb"
                         style={{ zIndex: 4 }}
                       />
                     </div>
+                  </div>
+                  
+                  {/* Manual input fields */}
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="number"
+                      value={priceRange[0]}
+                      onChange={(e) => handlePriceRangeChange([Number(e.target.value), priceRange[1]])}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      placeholder="Giá từ"
+                      min="0"
+                      max="10000000"
+                    />
+                    <span className="text-gray-500">→</span>
+                    <input
+                      type="number"
+                      value={priceRange[1]}
+                      onChange={(e) => handlePriceRangeChange([priceRange[0], Number(e.target.value)])}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      placeholder="Giá đến"
+                      min="0"
+                      max="10000000"
+                    />
                   </div>
                 </div>
       </div>
@@ -299,7 +336,7 @@ export default function ProductsPage() {
                 >
                   <option value="">Tất cả thương hiệu</option>
                   {brands.map((brand) => (
-                    <option key={brand._id} value={brand._id}>
+                    <option key={brand._id} value={brand.br_id}>
                       {brand.br_name}
                     </option>
                   ))}
@@ -319,7 +356,7 @@ export default function ProductsPage() {
                 >
                   <option value="">Tất cả danh mục</option>
                   {categories.map((category) => (
-                    <option key={category._id} value={category._id}>
+                    <option key={category._id} value={category.cg_id}>
                       {category.cg_name}
                     </option>
                   ))}
@@ -339,7 +376,7 @@ export default function ProductsPage() {
                 >
                   <option value="">Tất cả loại</option>
                   {productTypes.map((type) => (
-                    <option key={type._id} value={type._id}>
+                    <option key={type._id} value={type.pdt_id}>
                       {type.pdt_name}
                     </option>
                   ))}
@@ -359,7 +396,7 @@ export default function ProductsPage() {
                 >
                   <option value="">Tất cả tuyển thủ</option>
                   {players.map((player) => (
-                    <option key={player._id} value={player._id}>
+                    <option key={player._id} value={player.player_id}>
                       {player.player_name}
                     </option>
                   ))}

@@ -80,30 +80,67 @@ export default function PayOSPaymentDialog({
 
   /**
    * Countdown timer - 15 minutes timeout
+   * Start when dialog opens and payment is not completed/cancelled
    */
   useEffect(() => {
-    if (!isOpen || paymentStatus || isTimeout) return;
+    // Only start timer when dialog is open and not in a final state
+    if (!isOpen) {
+      console.log('⏸️ Dialog not open, timer not starting');
+      return;
+    }
+    
+    if (paymentStatus === PayOSStatus.PAID || paymentStatus === PayOSStatus.CANCELLED) {
+      console.log('⏸️ Payment already in final state:', paymentStatus);
+      return;
+    }
+    
+    if (isTimeout) {
+      console.log('⏸️ Already timed out');
+      return;
+    }
 
+    console.log('⏱️ Starting countdown timer (15 minutes)');
+    
     const timer = setInterval(() => {
       setCountdown((prev) => {
-        if (prev <= 1) {
+        const newValue = prev - 1;
+        
+        // Log every minute
+        if (newValue % 60 === 0 && newValue > 0) {
+          console.log(`⏱️ Countdown: ${Math.floor(newValue / 60)} minutes remaining`);
+        }
+        
+        // Timeout reached
+        if (newValue <= 0) {
+          console.log('⏰ Payment timeout - 15 minutes expired');
           clearInterval(timer);
           setIsTimeout(true);
           setIsPolling(false);
-          console.log('⏰ Payment timeout - 15 minutes expired');
           
-          // Notify parent about timeout
+          // Stop polling
+          if (stopPollingRef.current) {
+            stopPollingRef.current();
+            stopPollingRef.current = null;
+          }
+          
+          // Notify parent about timeout (defer to avoid setState in render)
           if (onTimeout) {
-            onTimeout();
+            setTimeout(() => {
+              onTimeout();
+            }, 0);
           }
           
           return 0;
         }
-        return prev - 1;
+        
+        return newValue;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      console.log('🛑 Clearing countdown timer');
+      clearInterval(timer);
+    };
   }, [isOpen, paymentStatus, isTimeout, onTimeout]);
 
   /**

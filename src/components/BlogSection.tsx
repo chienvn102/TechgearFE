@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
   ArrowRightIcon,
@@ -54,6 +55,7 @@ export default function BlogSection({
   onPostClick,
   onViewAll 
 }: BlogSectionProps) {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +85,10 @@ export default function BlogSection({
   };
 
   const handlePostClick = (post: Post) => {
+    // Navigate to post detail page
+    router.push(`/posts/${post._id}`);
+    
+    // Still call callback if provided
     if (onPostClick) {
       onPostClick(post);
     }
@@ -94,12 +100,27 @@ export default function BlogSection({
     }
   };
 
+  const [direction, setDirection] = useState<'left' | 'right'>('right');
+  const [isAnimating, setIsAnimating] = useState(false);
+
   const nextPost = () => {
-    setCurrentPostIndex((prev) => (prev + 1) % posts.length);
+    if (isAnimating) return;
+    setDirection('right');
+    setIsAnimating(true);
+    setTimeout(() => {
+      setCurrentPostIndex((prev) => (prev + 1) % posts.length);
+      setIsAnimating(false);
+    }, 500);
   };
 
   const prevPost = () => {
-    setCurrentPostIndex((prev) => (prev - 1 + posts.length) % posts.length);
+    if (isAnimating) return;
+    setDirection('left');
+    setIsAnimating(true);
+    setTimeout(() => {
+      setCurrentPostIndex((prev) => (prev - 1 + posts.length) % posts.length);
+      setIsAnimating(false);
+    }, 500);
   };
 
   if (loading) {
@@ -163,16 +184,38 @@ export default function BlogSection({
 
         {/* Main Content - Layout tương tự MCHOSE */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Side - Featured Post Image */}
+          {/* Left Side - Featured Post Image với Slide Fade Animation */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative"
           >
-            {/* Main Image Container với tilt effect như MCHOSE */}
-            <div className="relative transform rotate-2 hover:rotate-0 transition-transform duration-500">
-              <div className="bg-white rounded-2xl shadow-2xl p-4">
+            {/* Main Image Container với slide fade effect giống MCHOSE */}
+            <motion.div 
+              key={currentPostIndex}
+              initial={{ 
+                opacity: 0,
+                x: direction === 'right' ? 100 : -100,
+                scale: 0.95
+              }}
+              animate={{ 
+                opacity: 1,
+                x: 0,
+                scale: 1
+              }}
+              exit={{ 
+                opacity: 0,
+                x: direction === 'right' ? -100 : 100,
+                scale: 0.95
+              }}
+              transition={{
+                duration: 0.5,
+                ease: [0.23, 1, 0.32, 1] // Cubic bezier cho smooth animation
+              }}
+              className="relative"
+            >
+              <div className="bg-white rounded-2xl shadow-2xl p-4 hover:shadow-3xl transition-shadow duration-300">
                 <div className="aspect-[4/3] rounded-xl overflow-hidden">
                   {currentPost.post_img || currentPost.cloudinary_secure_url ? (
                     <SafeImage
@@ -180,8 +223,7 @@ export default function BlogSection({
                       alt={currentPost.post_title}
                       width={600}
                       height={450}
-                      className="w-full h-full object-cover"
-                      crop="fit"
+                      className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
@@ -195,7 +237,7 @@ export default function BlogSection({
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Navigation Arrows */}
             {posts.length > 1 && (
@@ -216,11 +258,16 @@ export default function BlogSection({
             )}
           </motion.div>
 
-          {/* Right Side - Content */}
+          {/* Right Side - Content với sync animation */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            key={`content-${currentPostIndex}`}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.6,
+              delay: 0.2,
+              ease: [0.23, 1, 0.32, 1]
+            }}
             className="space-y-6"
           >
             {/* Post Meta */}
@@ -253,46 +300,39 @@ export default function BlogSection({
               }
             </p>
 
-            {/* Action Buttons */}
+            {/* Action Button - Đọc thêm (màu gray-800 giống nút cũ) */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={() => handlePostClick(currentPost)}
-                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-8 py-3 bg-gray-800 text-white rounded-lg font-semibold hover:bg-gray-900 transition-colors"
               >
                 <span>Đọc thêm</span>
                 <ArrowRightIcon className="w-5 h-5 ml-2" />
               </button>
-              
-              {onViewAll && (
-                <button
-                  onClick={handleViewAll}
-                  className="inline-flex items-center px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-colors"
-                >
-                  Xem tất cả bài viết
-                </button>
-              )}
             </div>
 
-            {/* Post Indicators */}
+            {/* Post Indicators - ĐÃ BỎ text "Bài viết:" và số trang */}
             {posts.length > 1 && (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500">Bài viết:</span>
-                <div className="flex space-x-1">
-                  {posts.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentPostIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-colors ${
-                        index === currentPostIndex 
-                          ? 'bg-blue-600' 
-                          : 'bg-gray-300 hover:bg-gray-400'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-500">
-                  {currentPostIndex + 1} / {posts.length}
-                </span>
+              <div className="flex items-center justify-center space-x-2">
+                {posts.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      if (isAnimating) return;
+                      setDirection(index > currentPostIndex ? 'right' : 'left');
+                      setIsAnimating(true);
+                      setTimeout(() => {
+                        setCurrentPostIndex(index);
+                        setIsAnimating(false);
+                      }, 500);
+                    }}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === currentPostIndex 
+                        ? 'bg-gray-800' 
+                        : 'bg-gray-300 hover:bg-gray-400'
+                    }`}
+                  />
+                ))}
               </div>
             )}
           </motion.div>
@@ -327,7 +367,6 @@ export default function BlogSection({
                         width={400}
                         height={225}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        crop="fit"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">

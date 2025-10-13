@@ -42,7 +42,7 @@ api.interceptors.response.use(
       
       // Only redirect if we're in browser environment
       if (typeof window !== 'undefined') {
-        window.location.href = '/admin/auth/login';
+        window.location.href = 'http://localhost:5000/login';
       }
     }
 

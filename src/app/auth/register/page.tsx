@@ -305,7 +305,7 @@ export default function RegisterPage() {
               Đã có tài khoản?{' '}
               <button
                 type="button"
-                onClick={() => router.push('/login')}
+                onClick={() => window.location.href = 'http://localhost:5000/login'}
                 className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
                 Đăng nhập ngay

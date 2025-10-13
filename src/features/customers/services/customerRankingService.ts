@@ -21,7 +21,7 @@ export interface CustomerRanking {
     img?: string;
     about?: string;
   };
-  total_spending: number;
+  total_spending: number; // Deprecated - calculate from PAID orders instead
   created_at: string;
   updated_at: string;
 }

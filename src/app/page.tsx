@@ -92,7 +92,7 @@ export default function HomePage() {
     {
       icon: SparklesIcon,
       title: 'Chất lượng cao',
-      description: 'Vải cao cấp, bền đẹp theo thời gian'
+      description: 'Sản phẩm chất lượng, bền bỉ'
     }
   ];
 
@@ -127,11 +127,11 @@ export default function HomePage() {
             onBrandClick={handleBrandClick}
           />
 
-          {/* Hero Banner - Banner chính với thông tin tuyển thủ */}
-          <HeroBanner
+          {/* Hero Banner - Banner chính với thông tin tuyển thủ - TẠM ẨN */}
+          {/* <HeroBanner
             maxPlayers={5}
             onPlayerClick={handlePlayerClick}
-          />
+          /> */}
 
           {/* Features Section */}
           <section className="py-16 bg-gray-50">
@@ -167,26 +167,7 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Categories Section */}
-          <section className="py-16 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  Loại sản phẩm
-                </h2>
-                <p className="text-gray-600 text-lg">
-                  Khám phá các loại sản phẩm đa dạng
-                </p>
-              </div>
-              
-              <ProductTypeGrid
-                maxProductTypes={4}
-                onProductTypeClick={handleProductTypeClick}
-              />
-            </div>
-          </section>
-
-          {/* Featured Products Section */}
+          {/* Featured Products Section - ĐÃ CHUYỂN LÊN TRƯỚC */}
           <section className="py-16 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
@@ -203,6 +184,25 @@ export default function HomePage() {
                 showViewAll={true}
                 onViewAll={handleViewAllProducts}
                 onProductClick={handleProductClick}
+              />
+            </div>
+          </section>
+
+          {/* Categories Section - ĐÃ CHUYỂN XUỐNG SAU */}
+          <section className="py-16 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Loại sản phẩm
+                </h2>
+                <p className="text-gray-600 text-lg">
+                  Khám phá các loại sản phẩm đa dạng
+                </p>
+              </div>
+              
+              <ProductTypeGrid
+                maxProductTypes={4}
+                onProductTypeClick={handleProductTypeClick}
               />
             </div>
           </section>
@@ -284,7 +284,7 @@ export default function HomePage() {
                     onClick={() => router.push('/players')}
                     className="text-gray-400 hover:text-white transition-colors"
                   >
-                    Cầu thủ
+                    Tuyển thủ
                   </button>
                 </li>
                 <li>

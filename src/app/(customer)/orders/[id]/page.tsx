@@ -5,8 +5,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { orderService, Order } from '@/features/orders/services/orderService';
-import { paymentService, PayOSPaymentData } from '@/services/paymentService';
-import { PayOSPaymentDialog } from '@/components/PayOSPaymentDialog';
+import { paymentService } from '@/services/paymentService';
+import { CreatePaymentResponse } from '@/types/payment.types';
+import PayOSPaymentDialog from '@/components/PayOSPaymentDialog';
 import { PaymentStatusDisplay } from '@/components/PaymentStatusDisplay';
 
 export default function CustomerOrderDetailPage() {
@@ -20,7 +21,7 @@ export default function CustomerOrderDetailPage() {
   
   // PayOS payment states
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [paymentData, setPaymentData] = useState<PayOSPaymentData | null>(null);
+  const [paymentData, setPaymentData] = useState<CreatePaymentResponse['data'] | null>(null);
   const [creatingPayment, setCreatingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
@@ -128,6 +129,37 @@ export default function CustomerOrderDetailPage() {
   // Handle payment cancel
   const handlePaymentCancel = () => {
     setShowPaymentDialog(false);
+    setPaymentData(null);
+  };
+
+  // Handle payment timeout - cancel order
+  const handlePaymentTimeout = async () => {
+    console.log('⏰ Payment timeout - cancelling order');
+    
+    setShowPaymentDialog(false);
+    
+    // Cancel the payment
+    if (order && paymentData) {
+      try {
+        await paymentService.cancelPayment(paymentData.payos_order_code, {
+          cancellationReason: 'Hết thời gian thanh toán (15 phút)'
+        });
+        
+        // Reload order to show cancelled status
+        loadOrder();
+        
+        alert('Đơn hàng đã bị hủy do hết thời gian thanh toán. Vui lòng đặt hàng lại.');
+        
+        // Redirect to orders list after 2 seconds
+        setTimeout(() => {
+          router.push('/orders');
+        }, 2000);
+      } catch (err) {
+        console.error('Error cancelling payment:', err);
+        setPaymentError('Không thể hủy thanh toán. Vui lòng liên hệ hỗ trợ.');
+      }
+    }
+    
     setPaymentData(null);
   };
 
@@ -331,6 +363,8 @@ export default function CustomerOrderDetailPage() {
           onClose={handlePaymentCancel}
           paymentData={paymentData}
           onSuccess={handlePaymentSuccess}
+          onCancel={handlePaymentCancel}
+          onTimeout={handlePaymentTimeout}
           orderId={order._id}
         />
       )}

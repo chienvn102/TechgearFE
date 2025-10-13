@@ -35,7 +35,7 @@ export default function OrdersPage() {
       try {
         // Check authentication first
         if (!authService.isAuthenticated()) {
-          router.push('/login');
+          window.location.href = 'http://localhost:5000/login';
           return;
         }
         
@@ -61,7 +61,7 @@ export default function OrdersPage() {
           setError('Bạn cần đăng nhập để xem đơn hàng. Vui lòng đăng nhập lại.');
           // Auto redirect to login after 3 seconds
           setTimeout(() => {
-            router.push('/login');
+            window.location.href = 'http://localhost:5000/login';
           }, 3000);
         } else if (err.message?.includes('403') || err.message?.includes('Forbidden')) {
           setError('Bạn không có quyền truy cập trang này.');
@@ -148,7 +148,7 @@ export default function OrdersPage() {
                 <p className="text-red-800">{error}</p>
                 {error.includes('đăng nhập') && (
                   <Button
-                    onClick={() => router.push('/login')}
+                    onClick={() => window.location.href = 'http://localhost:5000/login'}
                     className="ml-4 bg-red-600 hover:bg-red-700 text-white"
                   >
                     Đăng nhập

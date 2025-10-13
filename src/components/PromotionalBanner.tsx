@@ -39,6 +39,21 @@ interface Banner {
     _id: string;
     pd_name: string;
     pd_id: string;
+    pd_price?: number;
+    pd_quantity?: number;
+    is_available?: boolean;
+    br_id?: {
+      _id: string;
+      br_name: string;
+    };
+    pdt_id?: {
+      _id: string;
+      pdt_name: string;
+    };
+    category_id?: {
+      _id: string;
+      category_name: string;
+    };
   };
   is_active: boolean;
   banner_image_url?: string;

@@ -18,7 +18,7 @@ export function AdminAuthGuard({ children, fallback }: AdminAuthGuardProps) {
     const checkAuth = async () => {
       // Check if user is authenticated
       if (!isAuthenticated()) {
-        router.push('/admin/login');
+        window.location.href = 'http://localhost:5000/login';
         return;
       }
 
@@ -42,7 +42,7 @@ export function AdminAuthGuard({ children, fallback }: AdminAuthGuardProps) {
         });
 
         if (!response.ok) {
-          router.push('/admin/login');
+          window.location.href = 'http://localhost:5000/login';
           return;
         }
 
@@ -55,7 +55,7 @@ export function AdminAuthGuard({ children, fallback }: AdminAuthGuardProps) {
           return;
         }
       } catch (error) {
-        router.push('/admin/login');
+        window.location.href = 'http://localhost:5000/login';
         return;
       } finally {
         setIsLoading(false);

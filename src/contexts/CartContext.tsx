@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '@/features/auth/services/authService';
+import { LoginRequiredDialog } from '@/components/LoginRequiredDialog';
 
 interface CartItem {
   _id: string;
@@ -34,6 +35,8 @@ interface CartContextType {
   deselectAllItems: () => void;
   getSelectedItems: () => CartItem[];
   getSelectedTotal: () => number;
+  // Authentication check methods
+  requireAuth: (callback: () => void, action?: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -54,6 +57,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [loginDialogAction, setLoginDialogAction] = useState<string>('');
 
   // Load cart on mount - try server first, then localStorage
   useEffect(() => {
@@ -116,34 +121,45 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   }, [items, isClearing]);
 
-  const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
-    setItems(prevItems => {
-      if (!Array.isArray(prevItems)) {
-        const newItems = [{ ...newItem, quantity: 1, selected: true }];
-        localStorage.setItem('cart', JSON.stringify(newItems));
-        return newItems;
-      }
-      
-      const existingItem = prevItems.find(item => 
-        item._id === newItem._id && item.color === newItem.color
-      );
+  const requireAuth = (callback: () => void, action: string = 'thực hiện hành động này') => {
+    if (!authService.isAuthenticated()) {
+      setLoginDialogAction(action);
+      setShowLoginDialog(true);
+      return;
+    }
+    callback();
+  };
 
-      let newItems;
-      if (existingItem) {
-        newItems = prevItems.map(item =>
+  const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
+    requireAuth(() => {
+      setItems(prevItems => {
+        if (!Array.isArray(prevItems)) {
+          const newItems = [{ ...newItem, quantity: 1, selected: true }];
+          localStorage.setItem('cart', JSON.stringify(newItems));
+          return newItems;
+        }
+        
+        const existingItem = prevItems.find(item => 
           item._id === newItem._id && item.color === newItem.color
-            ? { ...item, quantity: item.quantity + 1, selected: true }
-            : item
         );
-      } else {
-        newItems = [...prevItems, { ...newItem, quantity: 1, selected: true }];
-      }
-      
-      // ✅ Immediately save to localStorage to prevent data loss on F5
-      localStorage.setItem('cart', JSON.stringify(newItems));
-      
-      return newItems;
-    });
+
+        let newItems;
+        if (existingItem) {
+          newItems = prevItems.map(item =>
+            item._id === newItem._id && item.color === newItem.color
+              ? { ...item, quantity: item.quantity + 1, selected: true }
+              : item
+          );
+        } else {
+          newItems = [...prevItems, { ...newItem, quantity: 1, selected: true }];
+        }
+        
+        // ✅ Immediately save to localStorage to prevent data loss on F5
+        localStorage.setItem('cart', JSON.stringify(newItems));
+        
+        return newItems;
+      });
+    }, 'thêm sản phẩm vào giỏ hàng');
   };
 
   const removeItem = (itemId: string) => {
@@ -295,11 +311,17 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     deselectAllItems,
     getSelectedItems,
     getSelectedTotal,
+    requireAuth,
   };
 
   return (
     <CartContext.Provider value={value}>
       {children}
+      <LoginRequiredDialog
+        isOpen={showLoginDialog}
+        onClose={() => setShowLoginDialog(false)}
+        action={loginDialogAction}
+      />
     </CartContext.Provider>
   );
 };

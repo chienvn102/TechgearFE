@@ -71,11 +71,8 @@ export default function LoginPage() {
         <Card className="shadow-blue border-blue-200">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              E-Commerce Login
+              Đăng nhập
             </CardTitle>
-            <p className="text-gray-600 mt-2">
-              Enter your credentials to access the system
-            </p>
           </CardHeader>
           
           <CardContent className="space-y-6">
@@ -159,29 +156,29 @@ export default function LoginPage() {
             {/* Customer Registration Link */}
             <div className="text-center pt-4">
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
+                Chưa có tài khoản?{' '}
                 <button
                   type="button"
                   onClick={() => router.push('/auth/register')}
                   className="text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  Register as Customer
+                  Đăng ký ngay
                 </button>
               </p>
             </div>
+
+            {/* Back to Home Link */}
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={() => router.push('/')}
+                className="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+              >
+                ← Quay về trang chủ
+              </button>
+            </div>
           </CardContent>
         </Card>
-
-        {/* Backend Integration Info */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mt-6 text-center text-sm text-gray-500"
-        >
-          <p>🔗 Connected to: {process.env.NEXT_PUBLIC_API_BASE_URL}</p>
-          <p>📊 Backend: 30 Collections | JWT Authentication</p>
-        </motion.div>
       </motion.div>
     </div>
   );
