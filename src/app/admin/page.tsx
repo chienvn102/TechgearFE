@@ -18,6 +18,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui
 import { Badge } from '@/shared/components/ui/Badge';
 import { authService } from '@/features/auth/services/authService';
 import { productService } from '@/features/products/services/productService';
+import { analyticsService } from '@/features/analytics/services/analyticsService';
 import { formatCurrency } from '@/shared/utils/formatters';
 
 interface DashboardStats {
@@ -49,12 +50,15 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check authentication
-    if (!authService.isAuthenticated() || authService.getUserType() !== 'admin') {
+    // Check authentication - Allow both ADMIN and MANAGER
+    const userType = authService.getUserType();
+    if (!authService.isAuthenticated() || (userType !== 'admin' && userType !== 'manager')) {
+      console.log('❌ Dashboard access denied:', { userType, isAuth: authService.isAuthenticated() });
       window.location.href = 'http://localhost:5000/login';
       return;
     }
 
+    console.log('✅ Dashboard access granted for:', userType);
     fetchDashboardData();
   }, [router]);
 
@@ -63,36 +67,56 @@ export default function AdminDashboard() {
       setLoading(true);
       setError(null);
 
-      // Fetch products for stats (explicit page & limit)
-      const productsResponse = await productService.getProducts({ page: 1, limit: 50 });
-      if (productsResponse.success && productsResponse.data?.products) {
-        const products = productsResponse.data.products;
-        setStats(prev => ({
-          ...prev,
-          totalProducts: products.length,
-          totalRevenue: products.reduce((sum: number, product: any) => 
-            sum + (product.pd_price * (product.pd_sold || 0)), 0
-          )
-        }));
+      console.log('🔄 Fetching dashboard analytics from backend...');
 
-        // Get recent products (last 5)
-        const recent = products
-          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 5);
-        setRecentProducts(recent);
+      // Fetch complete dashboard analytics from backend
+      const analyticsResponse = await analyticsService.getDashboardData();
+      
+      console.log('📊 Analytics Response:', analyticsResponse);
+      console.log('📊 Data:', analyticsResponse?.data);
+      console.log('📊 Revenue:', analyticsResponse?.data?.revenue);
+      console.log('📊 Orders:', analyticsResponse?.data?.orders);
+      console.log('📊 Customers:', analyticsResponse?.data?.customers);
+      console.log('📊 Products:', analyticsResponse?.data?.products);
+
+      if (analyticsResponse.success && analyticsResponse.data) {
+        const data = analyticsResponse.data;
+        
+        // Update stats with real data from analytics
+        // Try multiple possible field names
+        const newStats = {
+          totalProducts: data.products?.total || data.products?.totalProducts || 0,
+          totalOrders: data.orders?.total || data.orders?.totalOrders || 0,
+          totalCustomers: data.customers?.total || data.customers?.totalCustomers || 0,
+          totalRevenue: data.revenue?.total || data.revenue?.totalRevenue || 0
+        };
+        
+        console.log('✅ Setting stats to:', newStats);
+        setStats(newStats);
       } else {
-        setError('Không thể tải danh sách sản phẩm');
+        console.error('❌ Analytics failed:', analyticsResponse);
+        setError('Không thể tải dữ liệu thống kê');
       }
 
-      // TODO: Fetch orders and customers data when APIs are available
-      // For now, using mock data
-      setStats(prev => ({
-        ...prev,
-        totalOrders: 156, // Mock data
-        totalCustomers: 89 // Mock data
-      }));
+      // Fetch products for recent products list
+      const productsResponse = await productService.getProducts({ page: 1, limit: 5 });
+      if (productsResponse.success && productsResponse.data?.products) {
+        const products = productsResponse.data.products;
+        
+        // Get recent products (last 5)
+        const recent = products
+          .sort((a: any, b: any) => {
+            const dateA = new Date(a.created_at || a.createdAt || 0).getTime();
+            const dateB = new Date(b.created_at || b.createdAt || 0).getTime();
+            return dateB - dateA;
+          })
+          .slice(0, 5);
+        setRecentProducts(recent);
+      }
 
     } catch (err: any) {
+      console.error('❌ Dashboard error:', err);
+      
       // More specific error handling
       if (err.message?.includes('401')) {
         setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
@@ -101,7 +125,7 @@ export default function AdminDashboard() {
       } else if (err.message?.includes('403')) {
         setError('Bạn không có quyền truy cập trang này.');
       } else if (err.message?.includes('404')) {
-        setError('API endpoint không tồn tại.');
+        setError('API endpoint không tồn tại. Vui lòng kiểm tra backend.');
       } else {
         setError(`Lỗi khi tải dữ liệu: ${err.message || 'Unknown error'}`);
       }

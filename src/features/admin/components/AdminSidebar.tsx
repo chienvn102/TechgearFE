@@ -20,7 +20,7 @@ import {
 
 const menuItems = [
   {
-    title: 'Dashboard',
+    title: 'Tổng quan',
     href: '/admin',
     icon: HomeIcon,
   },
@@ -50,7 +50,7 @@ const menuItems = [
     ],
   },
   {
-    title: 'Voucher',
+    title: 'Vouchers',
     href: '/admin/vouchers',
     icon: GiftIcon,
   },
@@ -60,7 +60,7 @@ const menuItems = [
     children: [
       { title: 'Bài viết', href: '/admin/posts' },
       { title: 'Banner', href: '/admin/banners' },
-      { title: 'Cầu thủ', href: '/admin/players' },
+      // { title: 'Cầu thủ', href: '/admin/players' }, // Hidden
     ],
   },
   {
@@ -69,7 +69,7 @@ const menuItems = [
     icon: ChartBarIcon,
   },
   {
-    title: 'Lịch sử hoạt động',
+    title: 'Lịch sử',
     href: '/admin/audit-trail',
     icon: ClockIcon,
   },

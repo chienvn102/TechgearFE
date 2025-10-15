@@ -171,6 +171,32 @@ export default function CustomerOrderDetailPage() {
     }).format(amount);
   };
 
+  // Get payment status color based on ps_name
+  const getPaymentStatusColor = (ps_name: string | undefined): string => {
+    if (!ps_name) return '#6b7280'; // gray
+    
+    const statusName = ps_name.toUpperCase();
+    
+    // Map payment status names to colors
+    if (statusName.includes('PAID') || statusName.includes('ĐÃ THANH TOÁN')) {
+      return '#10b981'; // green
+    }
+    if (statusName.includes('UNPAID') || statusName.includes('CHƯA THANH TOÁN')) {
+      return '#ef4444'; // red
+    }
+    if (statusName.includes('PENDING') || statusName.includes('CHỜ')) {
+      return '#f59e0b'; // amber
+    }
+    if (statusName.includes('REFUND') || statusName.includes('HOÀN')) {
+      return '#8b5cf6'; // purple
+    }
+    if (statusName.includes('PARTIAL') || statusName.includes('MỘT PHẦN')) {
+      return '#3b82f6'; // blue
+    }
+    
+    return '#6b7280'; // default gray
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -245,10 +271,31 @@ export default function CustomerOrderDetailPage() {
               </p>
             </div>
             <div>
-              <span className="text-gray-500">Trạng thái thanh toán:</span>
-              <p className="font-semibold text-gray-800">
-                {order.payment_status_id?.ps_name || 'N/A'}
-              </p>
+              <span className="text-gray-500 block mb-2">Trạng thái thanh toán:</span>
+              {(() => {
+                const paymentStatus = order.payment_status_id;
+                const statusName = typeof paymentStatus === 'object' && paymentStatus?.ps_name 
+                  ? paymentStatus.ps_name 
+                  : (typeof paymentStatus === 'string' ? paymentStatus : 'N/A');
+                
+                // Ưu tiên color_code từ backend, fallback về getPaymentStatusColor
+                const color = (typeof paymentStatus === 'object' && paymentStatus?.color_code) 
+                  ? paymentStatus.color_code 
+                  : getPaymentStatusColor(statusName);
+                
+                return (
+                  <span
+                    className="inline-flex px-3 py-1 rounded-full text-sm font-medium border"
+                    style={{
+                      backgroundColor: color + '20',
+                      color: color,
+                      borderColor: color + '40'
+                    }}
+                  >
+                    {statusName}
+                  </span>
+                );
+              })()}
             </div>
           </div>
         </motion.div>

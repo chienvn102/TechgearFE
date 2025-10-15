@@ -35,7 +35,7 @@ export default function Header() {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userType, setUserType] = useState<'admin' | 'customer' | 'unknown'>('unknown');
+  const [userType, setUserType] = useState<'admin' | 'manager' | 'customer' | 'unknown'>('unknown');
   
   // Cart functionality
   const { 
@@ -134,7 +134,7 @@ export default function Header() {
   const getUserDisplayName = () => {
     if (!currentUser) return 'User';
     
-    if (userType === 'admin') {
+    if (userType === 'admin' || userType === 'manager') {
       return currentUser.name || currentUser.username;
     } else if (userType === 'customer') {
       return currentUser.customer_id?.name || currentUser.username;
@@ -324,6 +324,44 @@ export default function Header() {
                         >
                           <ClockIcon className="w-4 h-4 mr-2" />
                           Lịch sử hoạt động
+                        </Link>
+                      </>
+                    )}
+
+                    {/* Manager/Staff Menu Items - Quyền hạn giới hạn hơn Admin */}
+                    {userType === 'manager' && (
+                      <>
+                        <Link
+                          href="/admin"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <Cog6ToothIcon className="w-4 h-4 mr-2" />
+                          Trang quản trị
+                        </Link>
+                        <Link
+                          href="/admin/products"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <CubeIcon className="w-4 h-4 mr-2" />
+                          Quản lý sản phẩm
+                        </Link>
+                        <Link
+                          href="/admin/orders"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <ShoppingCartIcon className="w-4 h-4 mr-2" />
+                          Quản lý đơn hàng
+                        </Link>
+                        <Link
+                          href="/admin/customers"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <UserGroupIcon className="w-4 h-4 mr-2" />
+                          Xem khách hàng
                         </Link>
                       </>
                     )}

@@ -30,16 +30,22 @@ export default function LoginPage() {
       const response = await authService.login(formData);
       if (response.success && response.data) {
         // Debug: Log the user object structure
+        console.log('✅ Login successful, user data:', response.data.user);
+        
         // Use authService methods to determine user type
         const userType = authService.getUserType();
-        // Check localStorage after login
+        console.log('👤 User type detected:', userType);
+        
         // Route based on user type
-        if (userType === 'admin') {
-          router.push('/admin'); // ✅ Redirect đến admin page chính
+        if (userType === 'admin' || userType === 'manager') {
+          console.log('🔐 Redirecting to admin panel...');
+          router.push('/admin'); // ✅ Redirect đến admin panel cho admin và manager
         } else if (userType === 'customer') {
+          console.log('🛒 Redirecting to home page...');
           // Force a page refresh to ensure Header updates
           window.location.href = '/';
         } else {
+          console.log('❓ Unknown user type, redirecting to home...');
           // Fallback for unknown user type
           window.location.href = '/';
         }
@@ -133,7 +139,7 @@ export default function LoginPage() {
             {/* Quick Login Buttons for Testing */}
             <div className="pt-6 border-t border-gray-200">
               <p className="text-sm text-gray-600 text-center mb-4">Quick Test Login:</p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <Button
                   variant="admin"
                   size="sm"
@@ -141,6 +147,15 @@ export default function LoginPage() {
                   disabled={loading}
                 >
                   Admin Test
+                </Button>
+                <Button
+                  variant="neutral"
+                  size="sm"
+                  onClick={() => setFormData({ username: 'nhanvien', password: 'chienvn102' })}
+                  disabled={loading}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700"
+                >
+                  Manager Test
                 </Button>
                 <Button
                   variant="customer"

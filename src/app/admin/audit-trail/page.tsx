@@ -13,6 +13,7 @@ import {
 import { auditTrailService } from '@/features/audit/services/auditTrailService';
 import { AuditTrail, AuditTrailFilters } from '@/features/audit/types/audit.types';
 import { formatDate } from '@/utils/formatters';
+import PermissionGuard from '@/components/PermissionGuard';
 
 export default function AuditTrailPage() {
   const [auditTrails, setAuditTrails] = useState<AuditTrail[]>([]);
@@ -116,12 +117,13 @@ export default function AuditTrailPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Lịch sử hoạt động</h1>
-          <p className="text-gray-600 mt-1">Theo dõi tất cả các thay đổi trong hệ thống</p>
+    <PermissionGuard requiredPermission="/admin/audit-trail">
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Lịch sử hoạt động</h1>
+            <p className="text-gray-600 mt-1">Theo dõi tất cả các thay đổi trong hệ thống</p>
         </div>
         <button
           onClick={loadAuditTrails}
@@ -417,6 +419,7 @@ export default function AuditTrailPage() {
           </>
         )}
       </div>
-    </div>
+      </div>
+    </PermissionGuard>
   );
 }

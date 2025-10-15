@@ -196,6 +196,46 @@ class AuthService extends BaseService {
   }
 
   /**
+   * Check if current user is manager
+   */
+  isManager(): boolean {
+    const user = this.getCurrentUser() as any;
+    if (!user) return false;
+    
+    // Debug logging
+    console.log('🔍 isManager() check:', {
+      user,
+      role_id: user.role_id,
+      role_id_role_id: user.role_id?.role_id,
+      role: user.role,
+      role_role_id: user.role?.role_id
+    });
+    
+    // Manager users have role_id object structure:
+    // { role_id: { _id: "...", role_id: "MANAGER", role_name: "Manager" } }
+    if (user.role_id?.role_id === 'MANAGER') {
+      console.log('✅ Manager detected via role_id.role_id');
+      return true;
+    }
+    
+    // Alternative role structure
+    if (user.role?.role_id === 'MANAGER') {
+      console.log('✅ Manager detected via role.role_id');
+      return true;
+    }
+    
+    console.log('❌ Not a manager');
+    return false;
+  }
+
+  /**
+   * Check if current user is staff (admin or manager)
+   */
+  isStaff(): boolean {
+    return this.isAdmin() || this.isManager();
+  }
+
+  /**
    * Check if current user is customer
    */
   isCustomer(): boolean {
@@ -210,14 +250,25 @@ class AuthService extends BaseService {
   /**
    * Get user type
    */
-  getUserType(): 'admin' | 'customer' | 'unknown' {
+  getUserType(): 'admin' | 'manager' | 'customer' | 'unknown' {
     const user = this.getCurrentUser();
     if (!user) return 'unknown';
     
     if (this.isAdmin()) return 'admin';
+    if (this.isManager()) return 'manager';
     if (this.isCustomer()) return 'customer';
     
     return 'unknown';
+  }
+
+  /**
+   * Get user role
+   */
+  getUserRole(): string | null {
+    const user = this.getCurrentUser() as any;
+    if (!user) return null;
+    
+    return user.role_id?.role_id || user.role?.role_id || null;
   }
 
   /**

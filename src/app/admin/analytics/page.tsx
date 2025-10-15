@@ -22,6 +22,7 @@ import { CustomerRankingChart } from '@/features/analytics/components/CustomerRa
 import { LoadingSkeleton } from '@/features/analytics/components/LoadingSkeleton';
 import { analyticsService } from '@/features/analytics/services/analyticsService';
 import { AnalyticsDashboardData } from '@/features/analytics/types/analytics.types';
+import PermissionGuard from '@/components/PermissionGuard';
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsDashboardData | null>(null);
@@ -106,12 +107,13 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+    <PermissionGuard requiredPermission="/admin/analytics">
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between"
       >
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
@@ -215,6 +217,7 @@ export default function AnalyticsPage() {
           </div>
         </motion.div>
       </div>
-    </div>
+      </div>
+    </PermissionGuard>
   );
 }

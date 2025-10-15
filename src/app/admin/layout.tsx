@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -29,27 +29,28 @@ import {
 import { authService } from '@/features/auth/services/authService';
 import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/ui/Badge';
+import { hasPermission, type UserRole } from '@/utils/permissions';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-const navItems = [
-  { href: '/admin', label: 'Dashboard', icon: Squares2X2Icon },
-  { href: '/admin/products', label: 'Products', icon: ShoppingBagIcon },
-  { href: '/admin/orders', label: 'Orders', icon: ClipboardDocumentListIcon },
-  { href: '/admin/customers', label: 'Customers', icon: UsersIcon },
-  { href: '/admin/vouchers', label: 'Vouchers', icon: TicketIcon },
-  { href: '/admin/categories', label: 'Categories', icon: TagIcon },
-  { href: '/admin/product-types', label: 'Product Types', icon: FolderIcon },
-  { href: '/admin/brands', label: 'Brands', icon: BuildingStorefrontIcon },
-  { href: '/admin/players', label: 'Players', icon: UserGroupIcon },
-  { href: '/admin/banners', label: 'Banners', icon: PhotoIcon },
-  { href: '/admin/posts', label: 'Posts', icon: NewspaperIcon },
-  { href: '/admin/notifications', label: 'Notifications', icon: BellIcon },
-  { href: '/admin/users-management', label: 'Users & Roles', icon: ShieldCheckIcon },
-  { href: '/admin/analytics', label: 'Analytics', icon: ChartBarIcon },
-  { href: '/admin/audit-trail', label: 'Lịch sử hoạt động', icon: ClockIcon },
+const allNavItems = [
+  { href: '/admin', label: 'Tổng quan', icon: Squares2X2Icon, roles: ['admin', 'manager'] as UserRole[] },
+  { href: '/admin/products', label: 'Sản phẩm', icon: ShoppingBagIcon, roles: ['admin', 'manager'] as UserRole[] },
+  { href: '/admin/orders', label: 'Đơn hàng', icon: ClipboardDocumentListIcon, roles: ['admin', 'manager'] as UserRole[] },
+  { href: '/admin/customers', label: 'Khách hàng', icon: UsersIcon, roles: ['admin', 'manager'] as UserRole[] },
+  { href: '/admin/vouchers', label: 'Vouchers', icon: TicketIcon, roles: ['admin', 'manager'] as UserRole[] },
+  { href: '/admin/categories', label: 'Danh mục', icon: TagIcon, roles: ['admin', 'manager'] as UserRole[] },
+  { href: '/admin/product-types', label: 'Loại sản phẩm', icon: FolderIcon, roles: ['admin', 'manager'] as UserRole[] },
+  { href: '/admin/brands', label: 'Thương hiệu', icon: BuildingStorefrontIcon, roles: ['admin', 'manager'] as UserRole[] },
+  // { href: '/admin/players', label: 'Cầu thủ', icon: UserGroupIcon, roles: ['admin', 'manager'] as UserRole[] }, // Hidden
+  { href: '/admin/banners', label: 'Banner', icon: PhotoIcon, roles: ['admin', 'manager'] as UserRole[] },
+  { href: '/admin/posts', label: 'Bài viết', icon: NewspaperIcon, roles: ['admin', 'manager'] as UserRole[] },
+  { href: '/admin/notifications', label: 'Thông báo', icon: BellIcon, roles: ['admin', 'manager'] as UserRole[] }, // ✅ Manager có quyền
+  { href: '/admin/users-management', label: 'Người dùng & Vai trò', icon: ShieldCheckIcon, roles: ['admin'] as UserRole[] }, // ❌ Chỉ admin
+  { href: '/admin/analytics', label: 'Phân tích', icon: ChartBarIcon, roles: ['admin'] as UserRole[] }, // ❌ Chỉ admin
+  { href: '/admin/audit-trail', label: 'Lịch sử', icon: ClockIcon, roles: ['admin'] as UserRole[] }, // ❌ Chỉ admin
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
@@ -57,10 +58,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const userRole = authService.getUserType();
+  const currentUser = authService.getCurrentUser();
+  
+  // Filter navigation items based on user role
+  const navItems = useMemo(() => {
+    return allNavItems.filter(item => item.roles.includes(userRole));
+  }, [userRole]);
 
   useEffect(() => {
-    if (!authService.isAuthenticated() || !authService.isAdmin()) {
+    // Allow both ADMIN and MANAGER to access admin panel
+    if (!authService.isAuthenticated() || (!authService.isAdmin() && !authService.isManager())) {
+      console.log('❌ Access denied - redirecting to login');
+      console.log('isAuthenticated:', authService.isAuthenticated());
+      console.log('isAdmin:', authService.isAdmin());
+      console.log('isManager:', authService.isManager());
       window.location.href = 'http://localhost:5000/login';
+    } else {
+      console.log('✅ Access granted to admin panel');
+      console.log('User role:', authService.getUserRole());
     }
     setMounted(true);
   }, [router]);
@@ -86,7 +102,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <Link href="/admin" className="font-semibold text-gray-900 text-lg">
               Admin Panel
             </Link>
-            <Badge variant="success" className="text-xs">Admin</Badge>
+            <Badge variant="success" className="text-xs">
+              {userRole === 'admin' ? 'Quản trị viên' : 'Nhân viên'}
+            </Badge>
           </div>
           
           {/* Navigation */}
@@ -115,7 +133,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="border-t p-4">
+          <div className="border-t p-4 space-y-3">
+            {/* User Info */}
+            <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg">
+              <div className="flex-shrink-0 w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                {currentUser?.username?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {currentUser?.username || 'User'}
+                </p>
+                <p className="text-xs text-gray-600">
+                  {userRole === 'admin' ? 'Quản trị viên' : 'Nhân viên'}
+                </p>
+              </div>
+            </div>
+
+            {/* Logout Button */}
             <Button 
               variant="outline" 
               onClick={handleLogout} 

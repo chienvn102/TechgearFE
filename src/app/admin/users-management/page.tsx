@@ -15,6 +15,7 @@ import {
 import { userManagementService, type UserManagement, type Role } from '@/features/admin/services/userManagementService';
 import UserFormModal from '@/features/admin/components/UserFormModal';
 import ChangeRoleModal from '@/features/admin/components/ChangeRoleModal';
+import PermissionGuard from '@/components/PermissionGuard';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<UserManagement[]>([]);
@@ -173,10 +174,11 @@ export default function UsersManagementPage() {
   };
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
+    <PermissionGuard requiredPermission="/admin/users-management">
+      <div className="p-6">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center">
               <UsersIcon className="h-8 w-8 mr-3 text-blue-600" />
@@ -498,6 +500,7 @@ export default function UsersManagementPage() {
           </>
         )}
       </div>
+      </div>
 
       {/* User Form Modal */}
       {showUserModal && (
@@ -524,6 +527,6 @@ export default function UsersManagementPage() {
           onChanged={handleRoleChanged}
         />
       )}
-    </div>
+    </PermissionGuard>
   );
 }
