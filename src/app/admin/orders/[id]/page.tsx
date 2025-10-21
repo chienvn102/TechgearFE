@@ -12,10 +12,12 @@ import {
   MapPinIcon,
   CreditCardIcon,
   TagIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
 import { orderService } from '@/features/orders/services/orderService';
 import type { Order } from '@/features/orders/services/orderService';
+import { getStatusLabel, getStatusColor } from '@/features/orders/utils/orderUtils';
 import { SafeImage } from '@/shared/components/ui/SafeImage';
 import { PaymentStatusDisplay } from '@/components/PaymentStatusDisplay';
 // Removed getProductImageUrls import - using SafeImage instead
@@ -26,8 +28,61 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportingInvoice, setExportingInvoice] = useState(false);
 
   const orderId = params?.id as string;
+
+  // Export invoice
+  const handleExportInvoice = async () => {
+    if (!order) return;
+    
+    try {
+      setExportingInvoice(true);
+      
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('auth-token');
+      
+      const response = await fetch(`${API_BASE_URL}/orders/${orderId}/invoice`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to export invoice');
+      }
+      
+      // Get filename from Content-Disposition header
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `INV-${order.od_id}.pdf`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      // Download PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      console.log('✅ Invoice exported successfully:', filename);
+      
+    } catch (err: any) {
+      console.error('❌ Export invoice error:', err);
+      alert('Lỗi khi xuất hóa đơn: ' + (err.message || 'Unknown error'));
+    } finally {
+      setExportingInvoice(false);
+    }
+  };
 
   // Load order details
   const loadOrder = async () => {
@@ -64,14 +119,10 @@ export default function OrderDetailPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            </div>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-500">Đang tải...</p>
           </div>
         </div>
       </div>
@@ -81,9 +132,10 @@ export default function OrderDetailPage() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">{error}</p>
-          <div className="mt-4 space-x-2">
+        <div className="text-center">
+          <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600 mb-4">{error}</p>
+          <div className="flex items-center justify-center space-x-4">
             <button
               onClick={loadOrder}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
@@ -126,7 +178,8 @@ export default function OrderDetailPage() {
         <div className="flex items-center space-x-4">
           <button
             onClick={() => router.push('/admin/orders')}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Quay lại danh sách"
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
@@ -136,18 +189,15 @@ export default function OrderDetailPage() {
           </div>
         </div>
         
-        <div className="flex items-center space-x-3">
-          <span
-            className="inline-flex px-3 py-1 rounded-full text-sm font-medium border"
-            style={{
-              backgroundColor: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code + '20' : '#f3f4f6'),
-              color: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code : '#374151'),
-              borderColor: (typeof order.payment_status_id === 'object' && order.payment_status_id?.color_code ? order.payment_status_id.color_code + '40' : '#d1d5db')
-            }}
-          >
-            {typeof order.payment_status_id === 'object' && order.payment_status_id?.ps_name ? order.payment_status_id.ps_name : (typeof order.payment_status_id === 'string' ? order.payment_status_id : 'N/A')}
-          </span>
-        </div>
+        {/* Export Invoice Button Only */}
+        <button
+          onClick={handleExportInvoice}
+          disabled={exportingInvoice}
+          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
+          {exportingInvoice ? 'Đang xuất...' : 'Xuất hóa đơn'}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -410,6 +460,7 @@ export default function OrderDetailPage() {
                 paymentMethodId={order.pm_id}
                 paymentStatus={order.payment_status_id}
                 payosOrderCode={order.payos_order_code}
+                paymentTransaction={(order as any).payment_transaction || null}
               />
             </div>
           </motion.div>
@@ -458,17 +509,37 @@ export default function OrderDetailPage() {
             </h2>
             
             <div className="space-y-3">
+              {/* Đơn hàng được tạo */}
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
                 <div>
                   <p className="text-sm font-medium text-gray-900">Đơn hàng được tạo</p>
                   <p className="text-xs text-gray-500">
-                    {order.created_at ? new Date(order.created_at).toLocaleString('vi-VN') : 'N/A'}
+                    {order.order_datetime ? new Date(order.order_datetime).toLocaleString('vi-VN') : 'N/A'}
                   </p>
                 </div>
               </div>
+
+              {/* Trạng thái giao hàng hiện tại */}
+              {order.order_info?.of_state && (
+                <div className="flex items-start space-x-3">
+                  <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${
+                    order.order_info.of_state === 'ORDER_SUCCESS' ? 'bg-green-600' :
+                    order.order_info.of_state === 'TRANSFER_TO_SHIPPING' ? 'bg-blue-600' :
+                    order.order_info.of_state === 'SHIPPING' ? 'bg-yellow-600' :
+                    order.order_info.of_state === 'DELIVERED' ? 'bg-green-600' :
+                    order.order_info.of_state === 'CANCELLED' ? 'bg-red-600' :
+                    'bg-gray-600'
+                  }`}></div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{getStatusLabel(order.order_info.of_state)}</p>
+                    <p className="text-xs text-gray-500">Trạng thái giao hàng</p>
+                  </div>
+                </div>
+              )}
               
-              {order.updated_at !== order.created_at && (
+              {/* Cập nhật gần nhất */}
+              {order.updated_at && order.updated_at !== order.order_datetime && (
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-2 h-2 bg-green-600 rounded-full mt-2"></div>
                   <div>
@@ -479,33 +550,6 @@ export default function OrderDetailPage() {
                   </div>
                 </div>
               )}
-            </div>
-          </motion.div>
-
-          {/* Actions */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.7 }}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-          >
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Thao tác</h2>
-            
-            <div className="space-y-3">
-              <button
-                onClick={() => router.push(`/admin/orders`)}
-                className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                Quay lại danh sách
-              </button>
-              
-              <button
-                onClick={() => router.push(`/admin/customers/${typeof order.customer_id === 'object' && order.customer_id?._id ? order.customer_id._id : order.customer_id}`)}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                disabled={!order.customer_id}
-              >
-                Xem thông tin khách hàng
-              </button>
             </div>
           </motion.div>
         </div>

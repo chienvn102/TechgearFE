@@ -91,6 +91,18 @@ export interface Order {
   // PayOS Integration fields
   payment_transaction_id?: string | null;
   payos_order_code?: number | null;
+  payment_transaction?: {
+    _id: string;
+    transaction_id: string;
+    payos_order_code: number;
+    payos_payment_link_id?: string;
+    amount: number;
+    status: string;
+    payment_link_url?: string;
+    qr_code_url?: string;
+    created_at: string;
+    updated_at: string;
+  } | null;
   ranking_discount?: number;
   created_at?: string;
   updated_at?: string;
@@ -376,6 +388,21 @@ class OrderService {
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to update order status');
+    }
+  }
+
+  /**
+   * Export invoice PDF - GET /api/v1/orders/:id/invoice
+   */
+  async exportInvoice(orderId: string): Promise<Blob> {
+    try {
+      const response = await apiClient.get(`${this.baseUrl}/${orderId}/invoice`, {
+        responseType: 'blob' // Important: tell axios to expect binary data
+      });
+
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to export invoice');
     }
   }
 }

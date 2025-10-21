@@ -603,13 +603,24 @@ export default function AdminOrdersPage() {
                     Trước
                   </button>
                   
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const pageNum = Math.max(1, Math.min(currentPage - 2 + i, totalPages - 4 + i));
-                    // Create unique key using both i and pageNum to avoid duplicates
-                    const uniqueKey = `page-${i}-${pageNum}`;
-                    return (
+                  {(() => {
+                    // Calculate pagination range
+                    let startPage = Math.max(1, currentPage - 2);
+                    let endPage = Math.min(totalPages, startPage + 4);
+                    
+                    // Adjust start if we're near the end
+                    if (endPage - startPage < 4) {
+                      startPage = Math.max(1, endPage - 4);
+                    }
+                    
+                    const pages = [];
+                    for (let i = startPage; i <= endPage; i++) {
+                      pages.push(i);
+                    }
+                    
+                    return pages.map((pageNum) => (
                       <button
-                        key={uniqueKey}
+                        key={`page-${pageNum}`}
                         onClick={() => setCurrentPage(pageNum)}
                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                           currentPage === pageNum
@@ -619,8 +630,8 @@ export default function AdminOrdersPage() {
                       >
                         {pageNum}
                       </button>
-                    );
-                  })}
+                    ));
+                  })()}
                   
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}

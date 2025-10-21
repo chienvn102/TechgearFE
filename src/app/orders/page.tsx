@@ -25,10 +25,23 @@ export default function OrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false); // Separate loading for search
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isInitialLoad, setIsInitialLoad] = useState(true); // Track initial load
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -45,10 +58,17 @@ export default function OrdersPage() {
           return;
         }
         
-        setLoading(true);
+        // Only show full page loading on initial load
+        // After that, always use searchLoading for smoother UX
+        if (isInitialLoad) {
+          setLoading(true);
+          setIsInitialLoad(false);
+        } else {
+          setSearchLoading(true);
+        }
         setError(null);
         
-        const response = await orderService.getMyOrders(currentPage, 10, searchQuery);
+        const response = await orderService.getMyOrders(currentPage, 10, debouncedSearchQuery);
         if (response.success) {
           setOrders(response.data.orders || []);
           setTotalPages(response.data.pagination?.pages || 1);
@@ -70,11 +90,12 @@ export default function OrdersPage() {
         }
       } finally {
         setLoading(false);
+        setSearchLoading(false);
       }
     };
 
     fetchOrders();
-  }, [currentPage, searchQuery, router]);
+  }, [currentPage, debouncedSearchQuery, router]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -167,18 +188,12 @@ export default function OrdersPage() {
                   type="text"
                   placeholder="Tìm kiếm đơn hàng theo tên sản phẩm..."
                   value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1); // Reset to first page when searching
-                  }}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => {
-                      setSearchQuery('');
-                      setCurrentPage(1);
-                    }}
+                    onClick={() => setSearchQuery('')}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     <XMarkIcon className="h-5 w-5" />
@@ -186,30 +201,51 @@ export default function OrdersPage() {
                 )}
               </div>
               <Button
-                onClick={() => {
-                  setSearchQuery('');
-                  setCurrentPage(1);
-                }}
+                onClick={() => setSearchQuery('')}
                 variant="outline"
                 disabled={!searchQuery}
               >
                 Xóa bộ lọc
               </Button>
-            </div>
           </div>
+        </div>
 
-          {orders.length === 0 ? (
+          {/* Search Loading Indicator - Only show during search */}
+          {searchLoading && (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600 font-medium">Đang tìm kiếm đơn hàng...</span>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!searchLoading && orders.length === 0 && (
             <div className="text-center py-16">
               <ShoppingBagIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Chưa có đơn hàng nào</h3>
-              <p className="text-gray-600 mb-6">Bạn chưa có đơn hàng nào. Hãy bắt đầu mua sắm!</p>
-              <Button onClick={() => router.push('/products')}>
-                Bắt đầu mua sắm
-              </Button>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {debouncedSearchQuery ? 'Không tìm thấy đơn hàng' : 'Chưa có đơn hàng nào'}
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {debouncedSearchQuery 
+                  ? `Không tìm thấy đơn hàng nào với từ khóa "${debouncedSearchQuery}"`
+                  : 'Bạn chưa có đơn hàng nào. Hãy bắt đầu mua sắm!'
+                }
+              </p>
+              {!debouncedSearchQuery && (
+                <Button onClick={() => router.push('/products')}>
+                  Bắt đầu mua sắm
+                </Button>
+              )}
             </div>
-          ) : (
+          )}
+
+          {/* Orders List */}
+          {!searchLoading && orders.length > 0 && (
             <div className="space-y-6">
               {orders.map((order, index) => {
+                // Get delivery status - handle both populated and unpopulated cases
+                const deliveryStatus = order.order_info?.of_state || 'ORDER_SUCCESS';
+                
                 return (
                 <motion.div
                   key={order._id}
@@ -236,8 +272,8 @@ export default function OrdersPage() {
                     </div>
                     
                     <div className="flex items-center space-x-4">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.order_info?.of_state || 'ORDER_SUCCESS')}`}>
-                        {getStatusText(order.order_info?.of_state || 'ORDER_SUCCESS')}
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(deliveryStatus)}`}>
+                        {getStatusText(deliveryStatus)}
                       </span>
                       
                       <Button
@@ -251,7 +287,7 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="flex items-center">
                       <CalendarIcon className="h-5 w-5 text-gray-400 mr-3" />
                       <div>
@@ -276,82 +312,9 @@ export default function OrdersPage() {
                       <TruckIcon className="h-5 w-5 text-gray-400 mr-3" />
                       <div>
                         <p className="text-sm text-gray-500">Tổng tiền</p>
-                        <p className="font-medium text-gray-900">{formatCurrency(order.order_total)}</p>
+                        <p className="font-semibold text-blue-600 text-lg">{formatCurrency(order.order_total)}</p>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="border-t border-gray-200 pt-4">
-                    {(() => {
-                      // Handle both array and single product cases
-                      const products = Array.isArray(order.po_id) ? order.po_id : (order.po_id ? [order.po_id] : []);
-                      const totalAmount = products.reduce((sum, po) => sum + (po.po_price * po.po_quantity), 0);
-                      
-                      if (products.length === 0) {
-                        return (
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm text-gray-500">Sản phẩm</p>
-                              <p className="font-medium text-gray-900">Sản phẩm không xác định</p>
-                              <p className="text-sm text-gray-500">Số lượng: 0</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-gray-500">Thành tiền</p>
-                              <p className="font-semibold text-gray-900">0 ₫</p>
-                            </div>
-                          </div>
-                        );
-                      }
-                      
-                      if (products.length === 1) {
-                        const product = products[0];
-                        return (
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm text-gray-500">Sản phẩm</p>
-                              <p className="font-medium text-gray-900">
-                                {product.pd_id?.pd_name || 'Sản phẩm không xác định'}
-                                {product.pd_id?.br_id && typeof product.pd_id.br_id === 'object' && 
-                                  ` - ${product.pd_id.br_id.br_name}`}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                Số lượng: {product.po_quantity || 0}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-gray-500">Thành tiền</p>
-                              <p className="font-semibold text-gray-900">
-                                {formatCurrency((product.po_price || 0) * (product.po_quantity || 0))}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      }
-                      
-                      // Multiple products
-                      return (
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="text-sm text-gray-500">Sản phẩm ({products.length} sản phẩm)</p>
-                            <p className="text-sm text-gray-500">Tổng tiền</p>
-                          </div>
-                          {products.map((product, index) => (
-                            <div key={index} className="flex items-center justify-between text-sm mb-1">
-                              <span className="text-gray-700">
-                                {product.pd_id?.pd_name || 'Sản phẩm không xác định'} x{product.po_quantity || 0}
-                              </span>
-                              <span className="text-gray-900">
-                                {formatCurrency((product.po_price || 0) * (product.po_quantity || 0))}
-                              </span>
-                            </div>
-                          ))}
-                          <div className="flex items-center justify-between border-t border-gray-100 pt-2 mt-2">
-                            <span className="font-medium text-gray-900">Tổng cộng</span>
-                            <span className="font-semibold text-gray-900">{formatCurrency(totalAmount)}</span>
-                          </div>
-                        </div>
-                      );
-                    })()}
                   </div>
                 </motion.div>
                 );

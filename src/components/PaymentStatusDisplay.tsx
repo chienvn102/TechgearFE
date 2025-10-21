@@ -22,18 +22,32 @@ interface PaymentStatusDisplayProps {
     color_code?: string; 
   };
   payosOrderCode?: number | null; // Add this prop to receive payos_order_code from order
+  paymentTransaction?: { // Add payment_transaction from backend
+    transaction_id: string;
+    status: string;
+    payos_order_code: number;
+    amount: number;
+  } | null;
 }
 
 export function PaymentStatusDisplay({ 
   orderId, 
   paymentMethodId, 
   paymentStatus,
-  payosOrderCode
+  payosOrderCode,
+  paymentTransaction
 }: PaymentStatusDisplayProps) {
   const [isVerifying, setIsVerifying] = useState(false);
   const [payosStatus, setPayosStatus] = useState<string | null>(null);
   const [payosColor, setPayosColor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  console.log('🔍 PaymentStatusDisplay props:', { 
+    orderId, 
+    payosOrderCode, 
+    hasPaymentTransaction: !!paymentTransaction,
+    transactionStatus: paymentTransaction?.status
+  });
 
   // Check if this is a PayOS order
   const isPayOSOrder = () => {
@@ -120,7 +134,44 @@ export function PaymentStatusDisplay({
 
   // Get status text and color
   const getStatusDisplay = () => {
-    // If PayOS order and we have PayOS status, use it
+    // Priority 1: If we have payment_transaction from backend, use it
+    if (paymentTransaction && paymentTransaction.status) {
+      const txnStatus = paymentTransaction.status.toUpperCase();
+      let statusText = '';
+      let statusColor = '';
+
+      switch (txnStatus) {
+        case 'COMPLETED':
+        case 'PAID':
+          statusText = 'Đã thanh toán';
+          statusColor = '#10b981'; // green-500
+          break;
+        case 'CANCELLED':
+        case 'FAILED':
+          statusText = 'Đã hủy';
+          statusColor = '#ef4444'; // red-500
+          break;
+        case 'PENDING':
+          statusText = 'Chờ thanh toán';
+          statusColor = '#f59e0b'; // amber-500
+          break;
+        case 'PROCESSING':
+          statusText = 'Đang xử lý';
+          statusColor = '#3b82f6'; // blue-500
+          break;
+        default:
+          statusText = paymentTransaction.status;
+          statusColor = '#6b7280'; // gray-500
+      }
+
+      return {
+        text: statusText,
+        color: statusColor,
+        description: 'Trạng thái từ PayOS Transaction'
+      };
+    }
+
+    // Priority 2: If PayOS order and we have real-time PayOS status, use it
     if (isPayOSOrder() && payosStatus && payosColor) {
       return {
         text: payosStatus,
@@ -129,7 +180,7 @@ export function PaymentStatusDisplay({
       };
     }
 
-    // Otherwise use database status
+    // Priority 3: Use database payment status
     if (typeof paymentStatus === 'object') {
       return {
         text: paymentStatus.ps_name || 'N/A',

@@ -8,7 +8,7 @@ import { orderService, Order } from '@/features/orders/services/orderService';
 import { paymentService } from '@/services/paymentService';
 import { CreatePaymentResponse } from '@/types/payment.types';
 import PayOSPaymentDialog from '@/components/PayOSPaymentDialog';
-import { PaymentStatusDisplay } from '@/components/PaymentStatusDisplay';
+import { SimplePaymentStatus } from '@/components/SimplePaymentStatus';
 
 export default function CustomerOrderDetailPage() {
   const params = useParams();
@@ -43,7 +43,10 @@ export default function CustomerOrderDetailPage() {
           od_id: orderData.od_id,
           pm_id: orderData.pm_id,
           payment_status_id: orderData.payment_status_id,
-          payos_order_code: orderData.payos_order_code
+          payos_order_code: orderData.payos_order_code,
+          payment_transaction: orderData.payment_transaction,
+          has_payment_transaction: !!orderData.payment_transaction,
+          transaction_status: orderData.payment_transaction?.status
         });
         
         setOrder(orderData);
@@ -250,52 +253,262 @@ export default function CustomerOrderDetailPage() {
             </button>
           </div>
 
-          {/* Order Info */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          {/* Order Info Grid */}
+          <div className="grid grid-cols-2 gap-4 text-sm border-t border-gray-200 pt-4">
             <div>
-              <span className="text-gray-500">Ngày đặt:</span>
+              <span className="text-gray-500">Ngày đặt hàng:</span>
               <p className="font-semibold text-gray-800">
                 {new Date(order.order_datetime).toLocaleString('vi-VN')}
               </p>
             </div>
             <div>
-              <span className="text-gray-500">Tổng tiền:</span>
-              <p className="font-semibold text-blue-600 text-lg">
-                {formatCurrency(order.order_total)}
-              </p>
-            </div>
-            <div>
-              <span className="text-gray-500">Phương thức thanh toán:</span>
+              <span className="text-gray-500">Khách hàng:</span>
               <p className="font-semibold text-gray-800">
-                {order.pm_id?.pm_name || 'N/A'}
+                {order.customer_name}
               </p>
             </div>
             <div>
-              <span className="text-gray-500 block mb-2">Trạng thái thanh toán:</span>
-              {(() => {
-                const paymentStatus = order.payment_status_id;
-                const statusName = typeof paymentStatus === 'object' && paymentStatus?.ps_name 
-                  ? paymentStatus.ps_name 
-                  : (typeof paymentStatus === 'string' ? paymentStatus : 'N/A');
-                
-                // Ưu tiên color_code từ backend, fallback về getPaymentStatusColor
-                const color = (typeof paymentStatus === 'object' && paymentStatus?.color_code) 
-                  ? paymentStatus.color_code 
-                  : getPaymentStatusColor(statusName);
-                
-                return (
-                  <span
-                    className="inline-flex px-3 py-1 rounded-full text-sm font-medium border"
-                    style={{
-                      backgroundColor: color + '20',
-                      color: color,
-                      borderColor: color + '40'
-                    }}
-                  >
-                    {statusName}
-                  </span>
-                );
-              })()}
+              <span className="text-gray-500">Số điện thoại:</span>
+              <p className="font-semibold text-gray-800">
+                {order.customer_id?.phone_number || 'N/A'}
+              </p>
+            </div>
+            <div>
+              <span className="text-gray-500">Email:</span>
+              <p className="font-semibold text-gray-800">
+                {order.customer_id?.email || 'N/A'}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Delivery Status */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-lg shadow-md p-6 mb-6"
+        >
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <span className="text-2xl mr-2">🚚</span>
+            Trạng thái giao hàng
+          </h2>
+          
+          <div className="relative">
+            {/* Timeline */}
+            <div className="space-y-4">
+              {/* Order Success */}
+              <div className="flex items-start space-x-4">
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                  order.order_info?.of_state ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'
+                }`}>
+                  ✓
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Đặt hàng thành công</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(order.order_datetime).toLocaleString('vi-VN')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Transfer to Shipping */}
+              <div className="flex items-start space-x-4">
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                  order.order_info?.of_state === 'TRANSFER_TO_SHIPPING' || 
+                  order.order_info?.of_state === 'SHIPPING' || 
+                  order.order_info?.of_state === 'DELIVERED'
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-gray-300 text-gray-500'
+                }`}>
+                  📦
+                </div>
+                <div>
+                  <p className={`font-semibold ${
+                    order.order_info?.of_state === 'TRANSFER_TO_SHIPPING' || 
+                    order.order_info?.of_state === 'SHIPPING' || 
+                    order.order_info?.of_state === 'DELIVERED'
+                      ? 'text-gray-900' 
+                      : 'text-gray-400'
+                  }`}>
+                    Chuyển qua giao nhận
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {order.order_info?.of_state === 'TRANSFER_TO_SHIPPING' || 
+                     order.order_info?.of_state === 'SHIPPING' || 
+                     order.order_info?.of_state === 'DELIVERED'
+                      ? 'Đơn hàng đã được chuyển sang bộ phận giao nhận' 
+                      : 'Chờ xử lý'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Shipping */}
+              <div className="flex items-start space-x-4">
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                  order.order_info?.of_state === 'SHIPPING' || 
+                  order.order_info?.of_state === 'DELIVERED'
+                    ? 'bg-yellow-500 text-white' 
+                    : 'bg-gray-300 text-gray-500'
+                }`}>
+                  🚚
+                </div>
+                <div>
+                  <p className={`font-semibold ${
+                    order.order_info?.of_state === 'SHIPPING' || 
+                    order.order_info?.of_state === 'DELIVERED'
+                      ? 'text-gray-900' 
+                      : 'text-gray-400'
+                  }`}>
+                    Đang giao hàng
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {order.order_info?.of_state === 'SHIPPING' || 
+                     order.order_info?.of_state === 'DELIVERED'
+                      ? 'Đơn hàng đang trên đường giao đến bạn' 
+                      : 'Chờ xử lý'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Delivered */}
+              <div className="flex items-start space-x-4">
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                  order.order_info?.of_state === 'DELIVERED'
+                    ? 'bg-green-500 text-white' 
+                    : 'bg-gray-300 text-gray-500'
+                }`}>
+                  ✓
+                </div>
+                <div>
+                  <p className={`font-semibold ${
+                    order.order_info?.of_state === 'DELIVERED'
+                      ? 'text-gray-900' 
+                      : 'text-gray-400'
+                  }`}>
+                    Giao hàng thành công
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {order.order_info?.of_state === 'DELIVERED'
+                      ? 'Đơn hàng đã được giao thành công' 
+                      : 'Chờ xử lý'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Cancelled */}
+              {order.order_info?.of_state === 'CANCELLED' && (
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-red-500 text-white">
+                    ✕
+                  </div>
+                  <div>
+                    <p className="font-semibold text-red-600">Đã hủy đơn</p>
+                    <p className="text-sm text-gray-500">Đơn hàng đã bị hủy</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Products List - Invoice Style */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-lg shadow-md p-6 mb-6"
+        >
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            Danh sách sản phẩm
+          </h2>
+          
+          {/* Products Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b-2 border-gray-300">
+                  <th className="text-left py-3 px-2 font-semibold text-gray-700">STT</th>
+                  <th className="text-left py-3 px-2 font-semibold text-gray-700">Tên sản phẩm</th>
+                  <th className="text-center py-3 px-2 font-semibold text-gray-700">Số lượng</th>
+                  <th className="text-right py-3 px-2 font-semibold text-gray-700">Đơn giá</th>
+                  <th className="text-right py-3 px-2 font-semibold text-gray-700">Thành tiền</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  const productOrders = Array.isArray(order.po_id) ? order.po_id : [order.po_id];
+                  return productOrders.map((productOrder, index) => {
+                    if (!productOrder || typeof productOrder !== 'object' || !productOrder.pd_id) {
+                      return null;
+                    }
+                    
+                    const product = productOrder.pd_id;
+                    const quantity = productOrder.po_quantity || 0;
+                    const price = productOrder.po_price || 0;
+                    const total = quantity * price;
+
+                    return (
+                      <tr key={productOrder._id || index} className="border-b border-gray-200">
+                        <td className="py-3 px-2 text-gray-700">{index + 1}</td>
+                        <td className="py-3 px-2">
+                          <p className="font-medium text-gray-900">
+                            {typeof product === 'object' ? product.pd_name : 'N/A'}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            SKU: {typeof product === 'object' ? product.pd_SKU : 'N/A'}
+                          </p>
+                        </td>
+                        <td className="py-3 px-2 text-center text-gray-700">{quantity}</td>
+                        <td className="py-3 px-2 text-right text-gray-700">{formatCurrency(price)}</td>
+                        <td className="py-3 px-2 text-right font-semibold text-gray-900">{formatCurrency(total)}</td>
+                      </tr>
+                    );
+                  });
+                })()}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Summary */}
+          <div className="mt-6 border-t-2 border-gray-300 pt-4">
+            <div className="flex justify-end">
+              <div className="w-full md:w-1/2 space-y-2">
+                {/* Subtotal */}
+                <div className="flex justify-between text-gray-700">
+                  <span>Tạm tính:</span>
+                  <span>{formatCurrency(order.order_total)}</span>
+                </div>
+
+                {/* Voucher Discount */}
+                {order.voucher_id && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Giảm giá ({order.voucher_id.voucher_code}):</span>
+                    <span>-{formatCurrency(order.voucher_id.discount_amount || 0)}</span>
+                  </div>
+                )}
+
+                {/* Total */}
+                <div className="flex justify-between text-xl font-bold text-blue-600 border-t border-gray-300 pt-2">
+                  <span>Tổng cộng:</span>
+                  <span>{formatCurrency(order.order_total)}</span>
+                </div>
+
+                {/* Payment Method */}
+                <div className="flex justify-between text-sm text-gray-600 pt-2">
+                  <span>Phương thức thanh toán:</span>
+                  <span className="font-semibold">{order.pm_id?.pm_name || 'N/A'}</span>
+                </div>
+
+                {/* Payment Status */}
+                <div className="flex justify-between text-sm items-center pt-1">
+                  <span className="text-gray-600">Trạng thái thanh toán:</span>
+                  <SimplePaymentStatus
+                    paymentTransaction={(order as any).payment_transaction}
+                    paymentStatus={order.payment_status_id as any}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -309,14 +522,28 @@ export default function CustomerOrderDetailPage() {
             className="bg-white rounded-lg shadow-md p-6 mb-6"
           >
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Trạng thái thanh toán PayOS
+              Thông tin thanh toán
             </h2>
-            <PaymentStatusDisplay 
-              orderId={order._id}
-              paymentMethodId={order.pm_id}
-              paymentStatus={order.payment_status_id}
-              payosOrderCode={order.payos_order_code || null}
-            />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phương thức thanh toán
+                </label>
+                <p className="text-base text-gray-900">
+                  {order.pm_id?.pm_name || 'Chuyển khoản ngân hàng'}
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Trạng thái thanh toán
+                </label>
+                <SimplePaymentStatus
+                  paymentTransaction={(order as any).payment_transaction}
+                  paymentStatus={order.payment_status_id as any}
+                />
+              </div>
+            </div>
           </motion.div>
         )}
 
@@ -378,12 +605,16 @@ export default function CustomerOrderDetailPage() {
           transition={{ delay: 0.3 }}
           className="bg-white rounded-lg shadow-md p-6 mb-6"
         >
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <span className="text-2xl mr-2">📍</span>
             Địa chỉ giao hàng
           </h2>
-          <div className="text-gray-700">
-            <p className="font-semibold">{order.customer_name}</p>
-            <p className="mt-2">{order.shipping_address}</p>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <p className="font-semibold text-gray-900">{order.customer_name}</p>
+            <p className="text-gray-700 mt-2">{order.shipping_address}</p>
+            {order.customer_id?.phone_number && (
+              <p className="text-gray-600 mt-1">SĐT: {order.customer_id.phone_number}</p>
+            )}
           </div>
         </motion.div>
 
@@ -393,12 +624,13 @@ export default function CustomerOrderDetailPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-lg shadow-md p-6"
+            className="bg-white rounded-lg shadow-md p-6 mb-6"
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <span className="text-2xl mr-2">📝</span>
               Ghi chú đơn hàng
             </h2>
-            <p className="text-gray-700">{order.order_note}</p>
+            <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{order.order_note}</p>
           </motion.div>
         )}
       </div>
