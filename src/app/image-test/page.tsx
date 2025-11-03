@@ -120,7 +120,8 @@ export default function ImageTestPage() {
                         src={getImageUrl(imageUrl, 'medium')}
                         alt={`Uploaded ${index + 1}`}
                         className="w-full h-full object-cover"
-                        onLoad={() => const target = e.target as HTMLImageElement;
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
                           target.src = '/images/placeholder.jpg';
                         }}
                       />

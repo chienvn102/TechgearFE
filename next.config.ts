@@ -13,9 +13,6 @@ const nextConfig: NextConfig = {
 	// Enable standalone output for Docker/optimized deployment
 	output: 'standalone',
 	
-	// Enable SWC minification for better performance
-	swcMinify: true,
-	
 	// Compress responses
 	compress: true,
 	
