@@ -46,8 +46,8 @@ class AuthService extends BaseService {
    * POST /auth/login
    */
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    // Use direct fetch for debugging
-    const API_BASE_URL = 'http://localhost:3000/api/v1';
+    // Use environment variable for API base URL
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
     
     try {
       const fetchResponse = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -107,7 +107,7 @@ class AuthService extends BaseService {
       // Try to call logout API, but don't fail if it doesn't work
       const token = localStorage.getItem('auth_token');
       if (token) {
-        const API_BASE_URL = 'http://localhost:3000/api/v1';
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
         await fetch(`${API_BASE_URL}/auth/logout`, {
           method: 'POST',
           headers: {
