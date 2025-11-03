@@ -136,38 +136,6 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Quick Login Buttons for Testing */}
-            <div className="pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600 text-center mb-4">Quick Test Login:</p>
-              <div className="grid grid-cols-3 gap-3">
-                <Button
-                  variant="admin"
-                  size="sm"
-                  onClick={() => setFormData({ username: 'admin', password: 'admin123' })}
-                  disabled={loading}
-                >
-                  Admin Test
-                </Button>
-                <Button
-                  variant="neutral"
-                  size="sm"
-                  onClick={() => setFormData({ username: 'nhanvien', password: 'chienvn102' })}
-                  disabled={loading}
-                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700"
-                >
-                  Manager Test
-                </Button>
-                <Button
-                  variant="customer"
-                  size="sm"
-                  onClick={() => setFormData({ username: 'customer01', password: 'customer123' })}
-                  disabled={loading}
-                >
-                  Customer Test
-                </Button>
-              </div>
-            </div>
-
             {/* Customer Registration Link */}
             <div className="text-center pt-4">
               <p className="text-sm text-gray-600">
