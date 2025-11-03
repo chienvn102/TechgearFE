@@ -15,7 +15,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { StatCard } from '@/features/analytics/components/StatCard';
-import { RevenueChart } from '@/features/analytics/components/RevenueChart';
+import { RevenueTable } from '@/features/analytics/components/RevenueTable';
 import { OrderStatusChart } from '@/features/analytics/components/OrderStatusChart';
 import { TopProductsTable } from '@/features/analytics/components/TopProductsTable';
 import { CustomerRankingChart } from '@/features/analytics/components/CustomerRankingChart';
@@ -165,11 +165,11 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RevenueChart data={data.revenue.timeline} />
-        <OrderStatusChart byStatus={data.orders.byStatus} />
-      </div>
+      {/* Revenue Table - Full Width */}
+      <RevenueTable />
+
+      {/* Order Status Chart */}
+      <OrderStatusChart byStatus={data.orders.byStatus} />
 
       {/* Top Products Table */}
       <TopProductsTable products={data.orders.topProducts} />

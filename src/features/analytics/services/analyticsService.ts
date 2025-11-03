@@ -38,6 +38,29 @@ class AnalyticsService {
   }
 
   /**
+   * Get revenue timeline with flexible filtering
+   * @param viewType - 'day' | 'week' | 'month' | 'year'
+   * @param options - { specificDate?, specificMonth?, specificYear? }
+   */
+  async getRevenueTimeline(
+    viewType: 'day' | 'week' | 'month' | 'year',
+    options?: {
+      specificDate?: string; // Format: YYYY-MM-DD
+      specificMonth?: string; // Format: YYYY-MM
+      specificYear?: string; // Format: YYYY
+    }
+  ) {
+    const params: any = { viewType };
+    
+    if (options?.specificDate) params.specificDate = options.specificDate;
+    if (options?.specificMonth) params.specificMonth = options.specificMonth;
+    if (options?.specificYear) params.specificYear = options.specificYear;
+    
+    const response = await apiClient.get(`${this.baseUrl}/revenue/timeline`, { params });
+    return response.data;
+  }
+
+  /**
    * Get order metrics only
    */
   async getOrderMetrics(dateRange?: DateRange) {

@@ -1,0 +1,123 @@
+# ============================================
+# .dockerignore - Frontend
+# ============================================
+# Files and directories to exclude from Docker build context
+# This reduces build time and image size
+# ============================================
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js build output
+.next/
+out/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# Testing
+coverage/
+.nyc_output/
+*.test.js
+*.spec.js
+__tests__/
+test/
+tests/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+docs/
+ADMIN_*.md
+AUDIT_*.md
+BANNER_*.md
+BRAND_*.md
+CART_*.md
+CHANGE_*.md
+CHECKOUT_*.md
+CLOUDINARY_*.md
+DEBUGGING_*.md
+DUPLICATE_*.md
+FRONTEND_*.md
+IMAGE_*.md
+NEXTJS_*.md
+NOTIFICATION_*.md
+ORDER_*.md
+PAYOS_*.md
+PRODUCT_*.md
+PROGRESS_*.md
+QUICK_*.md
+REALTIME_*.md
+REVIEWS_*.md
+REVIEW_*.md
+ROLES_*.md
+SEARCH_*.md
+SETUP_*.md
+SIDEBAR_*.md
+SIMPLE_*.md
+TESTING_*.md
+USERS_*.md
+WRITE_*.md
+
+# Debug and test files
+debug-*.js
+test-*.js
+test-*.html
+test-*.ps1
+check-*.js
+create-*.js
+browser-console-test.js
+fix-*.js
+quick-*.js
+upload-*.js
+
+# Logs
+logs/
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Scripts (not needed in production)
+scripts/
+
+# Public files (will be copied separately)
+# Keep public/ as it's needed for static assets
+
+# Lock files (already have package-lock.json)
+yarn.lock
+pnpm-lock.yaml
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore

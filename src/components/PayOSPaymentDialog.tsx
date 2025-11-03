@@ -436,16 +436,26 @@ export default function PayOSPaymentDialog({
                   </div>
                 </div>
 
-                {/* Open Payment Link Button */}
-                <Button
-                  onClick={handleOpenPaymentLink}
-                  variant="customer"
-                  size="lg"
-                  className="w-full"
-                >
-                  <ArrowTopRightOnSquareIcon className="w-5 h-5 mr-2" />
-                  Mở trang thanh toán trong tab mới
-                </Button>
+                {/* Action Buttons */}
+                <div className="flex gap-3 w-full">
+                  <Button
+                    onClick={handleOpenPaymentLink}
+                    variant="customer"
+                    size="lg"
+                    className="flex-1"
+                  >
+                    <ArrowTopRightOnSquareIcon className="w-5 h-5 mr-2" />
+                    Mở link thanh toán
+                  </Button>
+                  <Button
+                    onClick={handleCancelPayment}
+                    variant="outline"
+                    size="lg"
+                    className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    Hủy thanh toán
+                  </Button>
+                </div>
 
                 {/* Polling Indicator */}
                 {isPolling && (
@@ -461,21 +471,8 @@ export default function PayOSPaymentDialog({
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Action Buttons */}
-          {!paymentStatus && !error && (
-            <div className="flex gap-3 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={handleCancelPayment}
-                className="flex-1"
-                disabled={isPolling}
-              >
-                Hủy thanh toán
-              </Button>
-            </div>
-          )}
           
+          {/* Close button when error */}
           {error && (
             <div className="flex gap-3 pt-4 border-t">
               <Button

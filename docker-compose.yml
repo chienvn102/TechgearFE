@@ -1,0 +1,151 @@
+# ============================================
+# DOCKER COMPOSE - FULL STACK E-COMMERCE
+# ============================================
+# Services:
+# - MongoDB Database
+# - Backend API (Node.js/Express)
+# - Frontend UI (Next.js)
+# ============================================
+
+version: '3.8'
+
+services:
+  # ============================================
+  # MongoDB Database Service
+  # ============================================
+  mongodb:
+    image: mongo:7.0
+    container_name: ecommerce_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: ecommerce_system
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - ecommerce_network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ============================================
+  # Backend API Service
+  # ============================================
+  backend:
+    build:
+      context: ../duan_backend
+      dockerfile: Dockerfile
+    container_name: ecommerce_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Database Configuration
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/ecommerce_system?authSource=admin
+      
+      # Server Configuration
+      PORT: 3000
+      NODE_ENV: production
+      
+      # JWT Configuration
+      JWT_SECRET: your_jwt_secret_here_change_in_production
+      JWT_EXPIRES_IN: 7d
+      
+      # Cloudinary Configuration
+      CLOUDINARY_CLOUD_NAME: dfcerueaq
+      CLOUDINARY_API_KEY: 475252942396945
+      CLOUDINARY_API_SECRET: 47a94_CgguHLYCscNt39O0awvx0
+      
+      # CORS Configuration
+      FRONTEND_URL: http://localhost:5000
+      ALLOWED_ORIGINS: http://localhost:5000,http://frontend:5000
+      
+      # PayOS Configuration (if using)
+      PAYOS_CLIENT_ID: your_payos_client_id
+      PAYOS_API_KEY: your_payos_api_key
+      PAYOS_CHECKSUM_KEY: your_payos_checksum_key
+      PAYOS_RETURN_URL: http://localhost:5000/payment/success
+      PAYOS_CANCEL_URL: http://localhost:5000/payment/cancel
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - ecommerce_network
+    volumes:
+      - backend_uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ============================================
+  # Frontend UI Service
+  # ============================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecommerce_frontend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      # API Configuration
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:3000/api/v1
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      NEXT_PUBLIC_ENV: production
+      
+      # App Configuration
+      NEXT_PUBLIC_APP_NAME: E-Commerce System
+      NEXT_PUBLIC_APP_VERSION: 1.0.0
+      
+      # Cloudinary Configuration (Frontend)
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: dfcerueaq
+      NEXT_PUBLIC_CLOUDINARY_API_KEY: 475252942396945
+      NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: ecommerce_products
+      
+      # PayOS Payment Method ID
+      NEXT_PUBLIC_PAYOS_PAYMENT_METHOD_ID: 68e4e09c7b98c7c405270022
+      
+      # Next.js Configuration
+      PORT: 5000
+      HOSTNAME: 0.0.0.0
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - ecommerce_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  ecommerce_network:
+    driver: bridge
+    name: ecommerce_network
+
+# ============================================
+# Volumes
+# ============================================
+volumes:
+  mongodb_data:
+    name: ecommerce_mongodb_data
+  mongodb_config:
+    name: ecommerce_mongodb_config
+  backend_uploads:
+    name: ecommerce_backend_uploads

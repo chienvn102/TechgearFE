@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
 	},
 	// Disable React strict mode to reduce hydration warnings
 	reactStrictMode: false,
+	// Enable standalone output for Docker deployment
+	output: 'standalone',
 	// Configure images for external domains
 	images: {
 		domains: [

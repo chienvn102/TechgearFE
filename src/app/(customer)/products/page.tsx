@@ -502,8 +502,8 @@ export default function ProductsPage() {
             )}
           </div>
         </div>
-      </div>
-      
+        </div>
+
       {/* Custom CSS for dual range slider */}
       <style jsx>{`
         .slider-thumb::-webkit-slider-thumb {
@@ -527,6 +527,6 @@ export default function ProductsPage() {
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
       `}</style>
-    </div>
+      </div>
   );
 }

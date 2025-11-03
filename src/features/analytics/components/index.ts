@@ -3,6 +3,7 @@
 
 export { StatCard } from './StatCard';
 export { RevenueChart } from './RevenueChart';
+export { RevenueTable } from './RevenueTable';
 export { OrderStatusChart } from './OrderStatusChart';
 export { TopProductsTable } from './TopProductsTable';
 export { CustomerRankingChart } from './CustomerRankingChart';
