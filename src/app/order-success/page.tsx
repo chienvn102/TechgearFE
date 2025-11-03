@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
@@ -18,7 +18,8 @@ import { orderService } from '@/features/orders/services/orderService';
 import { SafeImage } from '@/shared/components/ui/SafeImage';
 import Header from '@/components/Header';
 
-export default function OrderSuccessPage() {
+// Component that uses useSearchParams must be wrapped in Suspense
+function OrderSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -339,5 +340,28 @@ export default function OrderSuccessPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <Header />
+        <div className="max-w-2xl mx-auto px-4 py-16">
+          <div className="text-center">
+            <div className="mx-auto w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-8 animate-pulse">
+              <CheckCircleIcon className="w-12 h-12 text-gray-400" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              Đang tải thông tin đơn hàng...
+            </h1>
+          </div>
+        </div>
+      </div>
+    }>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }

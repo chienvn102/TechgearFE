@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
@@ -14,7 +14,7 @@ import { VerifyPaymentResponse, PayOSStatus } from '@/types/payment.types';
 import { formatCurrency } from '@/utils/formatters';
 import { Button } from '@/shared/components/ui/Button';
 
-export default function PaymentCancelPage() {
+function PaymentCancelContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderCode = searchParams.get('orderCode');
@@ -242,5 +242,17 @@ export default function PaymentCancelPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function PaymentCancelPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+      </div>
+    }>
+      <PaymentCancelContent />
+    </Suspense>
   );
 }

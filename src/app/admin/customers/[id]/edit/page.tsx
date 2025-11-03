@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
@@ -26,7 +26,7 @@ interface AdminResetPasswordFormData {
   confirm_password: string;
 }
 
-export default function EditCustomerPage() {
+function EditCustomerContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -642,5 +642,20 @@ export default function EditCustomerPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function EditCustomerPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading customer data...</p>
+        </div>
+      </div>
+    }>
+      <EditCustomerContent />
+    </Suspense>
   );
 }
