@@ -3,10 +3,19 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 // Base API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
 
-// Create axios instance
+// Log API configuration
+console.log('🌐 API Base URL:', API_BASE_URL);
+console.log('🔧 Environment:', process.env.NEXT_PUBLIC_ENV || 'development');
+
+// Production validation
+if (process.env.NEXT_PUBLIC_ENV === 'production' && !API_BASE_URL.includes('railway.app')) {
+  console.warn('⚠️ WARNING: Production API URL should point to Railway backend!');
+}
+
+// Create axios instance with production-ready timeout
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: process.env.NEXT_PUBLIC_ENV === 'production' ? 30000 : 10000, // 30s for production, 10s for dev
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,10 +33,12 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Log request in development
-    if (process.env.NODE_ENV === 'development') {
+    // Log request in development only
+    if (process.env.NEXT_PUBLIC_ENV === 'development') {
+      console.log('📤 API Request:', config.method?.toUpperCase(), config.url);
       if (token) {
-        }
+        console.log('🔑 Auth token present');
+      }
     }
     
     return config;
@@ -40,9 +51,10 @@ apiClient.interceptors.request.use(
 // Response interceptor
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    // Log response in development
-    if (process.env.NODE_ENV === 'development') {
-      }
+    // Log response in development only
+    if (process.env.NEXT_PUBLIC_ENV === 'development') {
+      console.log('📥 API Response:', response.status, response.config.url);
+    }
     
     return response;
   },
@@ -51,9 +63,14 @@ apiClient.interceptors.response.use(
     if (error.response) {
       const { status, data } = error.response;
       
-      // Log error in development
-      if (process.env.NODE_ENV === 'development') {
-        }
+      // Log error in development only
+      if (process.env.NEXT_PUBLIC_ENV === 'development') {
+        console.error('❌ API Error:', {
+          status,
+          message: data?.message,
+          url: error.config?.url,
+        });
+      }
       
       // Handle specific status codes
       switch (status) {
@@ -72,11 +89,15 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('user_data');
             localStorage.removeItem('user');
             if (typeof window !== 'undefined') {
-              window.location.href = 'http://localhost:5000/login';
+              // Use dynamic redirect based on environment
+              const loginUrl = process.env.NEXT_PUBLIC_ENV === 'production' 
+                ? '/login' 
+                : 'http://localhost:5000/login';
+              window.location.href = loginUrl;
             }
           } else {
-            }
-          break;
+            console.log('⚠️ Skipping auto-logout for order/profile endpoints');
+          }
         case 403:
           // Forbidden
           break;
@@ -85,10 +106,13 @@ apiClient.interceptors.response.use(
           break;
         case 500:
           // Server error
+          console.error('❌ Server error:', data?.message);
           break;
         default:
+          if (process.env.NEXT_PUBLIC_ENV === 'development') {
+            console.error('❌ HTTP Error:', status, data?.message);
           }
-      
+      }
       // Return error with message
       return Promise.reject({
         status,
