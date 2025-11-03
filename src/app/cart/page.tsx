@@ -123,13 +123,20 @@ export default function CartPage() {
         </motion.div>
 
         {/* Empty Cart */}
-        {isEmpty && (
+        {(!items || items.length === 0) && !loading && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             className="text-center py-16"
           >
+            <ShoppingCartIcon className="w-24 h-24 mx-auto text-gray-300 mb-6" />
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              Your cart is empty
+            </h2>
+            <p className="text-gray-500 mb-8">
+              Add some products to your cart to get started
+            </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -292,7 +299,7 @@ export default function CartPage() {
                       handleProceedToCheckout();
                     }}
                     className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={loading || isEmpty}
+                    disabled={loading || !items || items.length === 0}
                   >
                     {loading ? (
                       <div className="flex items-center justify-center">
