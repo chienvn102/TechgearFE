@@ -210,7 +210,8 @@ export default function CheckoutPage() {
   const loadPaymentMethods = async () => {
     try {
       setIsLoadingPaymentMethods(true);
-      const response = await fetch('http://localhost:3000/api/v1/payment-methods/active');
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
+      const response = await fetch(`${API_BASE_URL}/payment-methods/active`);
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.data && data.data.paymentMethods) {

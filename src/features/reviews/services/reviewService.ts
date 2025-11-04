@@ -18,7 +18,7 @@ import {
   PurchaseVerification
 } from '../types/review.types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
 const REVIEWS_ENDPOINT = `${API_BASE_URL}/product-reviews`;
 
 // Helper: Get auth token from localStorage

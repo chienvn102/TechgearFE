@@ -69,7 +69,8 @@ export default function ProductDetailPage() {
       try {
         setLoading(true);
         
-        const response = await fetch(`http://localhost:3000/api/v1/products/${params.id}`);
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
+        const response = await fetch(`${API_BASE_URL}/products/${params.id}`);
         const data = await response.json();
 
         if (data.success && data.data && data.data.product) {

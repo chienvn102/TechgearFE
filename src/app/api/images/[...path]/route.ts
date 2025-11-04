@@ -7,7 +7,8 @@ export async function GET(
 ) {
   try {
     const imagePath = params.path.join('/');
-    const backendUrl = `http://localhost:3000/uploads/${imagePath}`;
+    const backendBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const backendUrl = `${backendBaseUrl}/uploads/${imagePath}`;
     
     const response = await fetch(backendUrl, {
       method: 'GET',

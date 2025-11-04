@@ -18,7 +18,7 @@ export function AdminAuthGuard({ children, fallback }: AdminAuthGuardProps) {
     const checkAuth = async () => {
       // Check if user is authenticated
       if (!isAuthenticated()) {
-        window.location.href = 'http://localhost:5000/login';
+        window.location.href = '/login';
         return;
       }
 
@@ -34,7 +34,8 @@ export function AdminAuthGuard({ children, fallback }: AdminAuthGuardProps) {
 
       // Verify token with backend
       try {
-        const response = await fetch('http://localhost:3000/api/v1/auth/verify', {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
+        const response = await fetch(`${API_BASE_URL}/auth/verify`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -42,7 +43,7 @@ export function AdminAuthGuard({ children, fallback }: AdminAuthGuardProps) {
         });
 
         if (!response.ok) {
-          window.location.href = 'http://localhost:5000/login';
+          window.location.href = '/login';
           return;
         }
 
@@ -55,7 +56,7 @@ export function AdminAuthGuard({ children, fallback }: AdminAuthGuardProps) {
           return;
         }
       } catch (error) {
-        window.location.href = 'http://localhost:5000/login';
+        window.location.href = '/login';
         return;
       } finally {
         setIsLoading(false);
