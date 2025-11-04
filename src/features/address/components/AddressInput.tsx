@@ -69,9 +69,9 @@ export const AddressInput: React.FC<AddressInputProps> = ({
     const addressData: Partial<AddressData> = {
       house_number: houseNumber,
       street: street,
-      ward: selectedWardName || selectedWard,
-      district: selectedDistrictName || selectedDistrict,
-      province: selectedProvinceName || selectedProvince
+      ward: selectedWardName,
+      district: selectedDistrictName,
+      province: selectedProvinceName
     };
 
     const validation = addressService.validateAddress(addressData);
@@ -83,12 +83,13 @@ export const AddressInput: React.FC<AddressInputProps> = ({
       const fullAddress = `${houseNumber} ${street}, ${selectedWardName}, ${selectedDistrictName}, ${selectedProvinceName}`;
       onAddressChange({
         ...addressData as AddressData,
-        full_address: fullAddress
+        full_address: fullAddress,
+        address: fullAddress
       });
     } else {
       onAddressChange(null);
     }
-  }, [houseNumber, street, selectedWard, selectedDistrict, selectedProvince, onAddressChange]);
+  }, [houseNumber, street, selectedWardName, selectedDistrictName, selectedProvinceName, onAddressChange]);
 
   const loadProvinces = async () => {
     setLoading(prev => ({ ...prev, provinces: true }));

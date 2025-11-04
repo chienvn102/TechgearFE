@@ -24,6 +24,7 @@ export interface AddressData {
   district: string;
   province: string;
   full_address: string;
+  address?: string; // Additional field for backend compatibility
 }
 
 class AddressService {
