@@ -36,8 +36,7 @@ export function NotificationDropdown() {
         refreshUnreadCount(); // Refresh unread count from context
       }
     } catch (err) {
-      console.error('Failed to load notifications:', err);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };
@@ -49,8 +48,7 @@ export function NotificationDropdown() {
       setNotifications(notifications.map(n => ({ ...n, is_read: true })));
       refreshUnreadCount(); // Refresh unread count from context
     } catch (err) {
-      console.error('Failed to mark all as read:', err);
-    }
+      }
   };
 
   // Handle notification click
@@ -74,8 +72,7 @@ export function NotificationDropdown() {
       
       setIsOpen(false);
     } catch (err) {
-      console.error('Failed to handle notification click:', err);
-    }
+      }
   };
 
   // Close dropdown when clicking outside

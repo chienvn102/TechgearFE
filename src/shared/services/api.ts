@@ -4,9 +4,6 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
 
 // Log API configuration
-console.log('🌐 API Base URL:', API_BASE_URL);
-console.log('🔧 Environment:', process.env.NEXT_PUBLIC_ENV || 'development');
-
 // Production validation
 if (process.env.NEXT_PUBLIC_ENV === 'production' && !API_BASE_URL.includes('railway.app')) {
   console.warn('⚠️ WARNING: Production API URL should point to Railway backend!');
@@ -37,8 +34,7 @@ apiClient.interceptors.request.use(
     if (process.env.NEXT_PUBLIC_ENV === 'development') {
       console.log('📤 API Request:', config.method?.toUpperCase(), config.url);
       if (token) {
-        console.log('🔑 Auth token present');
-      }
+        }
     }
     
     return config;
@@ -53,8 +49,7 @@ apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     // Log response in development only
     if (process.env.NEXT_PUBLIC_ENV === 'development') {
-      console.log('📥 API Response:', response.status, response.config.url);
-    }
+      }
     
     return response;
   },
@@ -65,12 +60,7 @@ apiClient.interceptors.response.use(
       
       // Log error in development only
       if (process.env.NEXT_PUBLIC_ENV === 'development') {
-        console.error('❌ API Error:', {
-          status,
-          message: data?.message,
-          url: error.config?.url,
-        });
-      }
+        }
       
       // Handle specific status codes
       switch (status) {
@@ -96,8 +86,7 @@ apiClient.interceptors.response.use(
               window.location.href = loginUrl;
             }
           } else {
-            console.log('⚠️ Skipping auto-logout for order/profile endpoints');
-          }
+            }
         case 403:
           // Forbidden
           break;
@@ -106,12 +95,10 @@ apiClient.interceptors.response.use(
           break;
         case 500:
           // Server error
-          console.error('❌ Server error:', data?.message);
           break;
         default:
           if (process.env.NEXT_PUBLIC_ENV === 'development') {
-            console.error('❌ HTTP Error:', status, data?.message);
-          }
+            }
       }
       // Return error with message
       return Promise.reject({

@@ -51,8 +51,7 @@ export function RevenueTable() {
         setTotalRevenue(response.data.totalRevenue || 0);
       }
     } catch (error) {
-      console.error('Error fetching revenue timeline:', error);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

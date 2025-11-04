@@ -58,8 +58,7 @@ export default function CustomerNotificationsPage() {
       await notificationService.markAllAsRead();
       loadNotifications();
     } catch (err) {
-      console.error('Failed to mark all as read:', err);
-    }
+      }
   };
 
   // Handle notification click
@@ -75,8 +74,7 @@ export default function CustomerNotificationsPage() {
         router.push(`/notifications/${notification._id}`);
       }
     } catch (err) {
-      console.error('Failed to handle notification:', err);
-    }
+      }
   };
 
   useEffect(() => {

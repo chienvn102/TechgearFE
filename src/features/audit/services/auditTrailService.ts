@@ -18,7 +18,6 @@ class AuditTrailService {
       const response = await apiClient.get(this.baseUrl, { params: cleanFilters });
       return response.data;
     } catch (error) {
-      console.error('Error fetching audit trails:', error);
       throw error;
     }
   }
@@ -31,7 +30,6 @@ class AuditTrailService {
       const response = await apiClient.get(`${this.baseUrl}/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching audit trail:', error);
       throw error;
     }
   }
@@ -44,7 +42,6 @@ class AuditTrailService {
       const response = await apiClient.get(`${this.baseUrl}/statistics`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching statistics:', error);
       throw error;
     }
   }
@@ -60,7 +57,6 @@ class AuditTrailService {
       });
       return response.data;
     } catch (error) {
-      console.error('Error exporting audit trails:', error);
       throw error;
     }
   }

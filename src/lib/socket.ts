@@ -14,7 +14,6 @@ class SocketService {
    */
   connect(customerId: string) {
     if (this.socket?.connected && this.customerId === customerId) {
-      console.log('✅ Socket already connected for customer:', customerId);
       return;
     }
 
@@ -23,8 +22,6 @@ class SocketService {
       this.disconnect();
     }
 
-    console.log('🔌 Connecting to Socket.io server:', SOCKET_URL);
-    
     this.socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       reconnection: true,
@@ -35,21 +32,17 @@ class SocketService {
     this.customerId = customerId;
 
     this.socket.on('connect', () => {
-      console.log('✅ Socket connected:', this.socket?.id);
       // Join customer-specific room
       this.socket?.emit('join:customer', customerId);
     });
 
     this.socket.on('disconnect', () => {
-      console.log('🔌 Socket disconnected');
-    });
+      });
 
     this.socket.on('connect_error', (error) => {
-      console.error('❌ Socket connection error:', error);
-    });
+      });
 
     this.socket.on('reconnect', (attemptNumber) => {
-      console.log('🔄 Socket reconnected after', attemptNumber, 'attempts');
       // Rejoin customer room after reconnection
       this.socket?.emit('join:customer', customerId);
     });
@@ -60,7 +53,6 @@ class SocketService {
    */
   disconnect() {
     if (this.socket) {
-      console.log('🔌 Disconnecting socket...');
       this.socket.disconnect();
       this.socket = null;
       this.customerId = null;

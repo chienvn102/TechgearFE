@@ -23,15 +23,7 @@ export default function PermissionGuard({ children, requiredPermission }: Permis
       const userRole = authService.getUserType();
       const pathToCheck = requiredPermission || pathname;
 
-      console.log('🔒 Permission check:', {
-        userRole,
-        pathToCheck,
-        pathname
-      });
-
       const allowed = hasPermission(userRole, pathToCheck);
-
-      console.log(allowed ? '✅ Access granted' : '❌ Access denied');
 
       if (!allowed) {
         setHasAccess(false);

@@ -214,17 +214,14 @@ class AuthService extends BaseService {
     // Manager users have role_id object structure:
     // { role_id: { _id: "...", role_id: "MANAGER", role_name: "Manager" } }
     if (user.role_id?.role_id === 'MANAGER') {
-      console.log('✅ Manager detected via role_id.role_id');
       return true;
     }
     
     // Alternative role structure
     if (user.role?.role_id === 'MANAGER') {
-      console.log('✅ Manager detected via role.role_id');
       return true;
     }
     
-    console.log('❌ Not a manager');
     return false;
   }
 

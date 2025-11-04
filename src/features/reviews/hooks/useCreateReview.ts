@@ -109,7 +109,6 @@ export const useCreateReview = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to verify purchase';
       setError(errorMessage);
-      console.error('[useCreateReview] Error checking purchase:', err);
       onError?.(errorMessage);
     } finally {
       setIsCheckingPurchase(false);
@@ -154,7 +153,6 @@ export const useCreateReview = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create review';
       setError(errorMessage);
-      console.error('[useCreateReview] Error creating review:', err);
       onError?.(errorMessage);
       return null;
     } finally {
@@ -200,7 +198,6 @@ export const useCreateReview = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload images';
       setError(errorMessage);
-      console.error('[useCreateReview] Error uploading images:', err);
       onError?.(errorMessage);
       return false;
     } finally {
@@ -233,7 +230,6 @@ export const useCreateReview = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update review';
       setError(errorMessage);
-      console.error('[useCreateReview] Error updating review:', err);
       onError?.(errorMessage);
       return false;
     } finally {

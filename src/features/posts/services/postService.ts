@@ -35,7 +35,6 @@ class PostService {
       const response = await api.get(this.baseUrl, { params });
       return response.data;
     } catch (error: any) {
-      console.error('Error fetching posts:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch posts');
     }
   }
@@ -69,7 +68,6 @@ class PostService {
       const response = await api.get(`${this.baseUrl}/by-post-id/${postId}`);
       return response.data;
     } catch (error: any) {
-      console.error('Error fetching post by post_id:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch post');
     }
   }

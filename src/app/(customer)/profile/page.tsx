@@ -53,8 +53,7 @@ export default function CustomerProfilePage() {
         }
       }
     } catch (error) {
-      console.error('Error loading customer profile:', error);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };
@@ -68,13 +67,11 @@ export default function CustomerProfilePage() {
     try {
       // Update customer information
       // TODO: Implement customer update API call
-      console.log('Update customer info:', formData);
       setIsEditingPersonal(false);
       // Reload profile after update
       await loadCustomerProfile();
     } catch (error) {
-      console.error('Error updating customer info:', error);
-    }
+      }
   };
 
   if (loading) {
@@ -333,8 +330,7 @@ export default function CustomerProfilePage() {
         onClose={() => setIsChangePasswordModalOpen(false)}
         onSuccess={() => {
           // Optional: Show success message or reload user data
-          console.log('Password changed successfully');
-        }}
+          }}
       />
     </>
   );

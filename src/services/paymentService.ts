@@ -69,12 +69,6 @@ class PaymentService {
       const errorMessage = axiosError.response?.data?.message || axiosError.message || 'An error occurred';
       const errorCode = axiosError.response?.data?.error?.code;
       
-      console.error('❌ Payment API Error:', {
-        message: errorMessage,
-        code: errorCode,
-        status: axiosError.response?.status,
-      });
-
       throw new Error(errorMessage);
     }
     
@@ -87,11 +81,6 @@ class PaymentService {
    */
   async createPayOSPayment(data: CreatePaymentRequest): Promise<CreatePaymentResponse> {
     try {
-      console.log('📤 Creating PayOS payment:', {
-        orderId: data.order_id,
-        amount: data.amount,
-      });
-
       const response = await axios.post<CreatePaymentResponse>(
         `${this.baseURL}/payos/create`,
         data,
@@ -100,11 +89,6 @@ class PaymentService {
           withCredentials: true, // Send cookies with request
         }
       );
-
-      console.log('✅ Payment created:', {
-        transactionId: response.data.data.transaction_id,
-        orderCode: response.data.data.payos_order_code,
-      });
 
       return response.data;
     } catch (error) {
@@ -118,20 +102,12 @@ class PaymentService {
    */
   async verifyPayment(orderCode: number): Promise<VerifyPaymentResponse> {
     try {
-      console.log('🔍 Verifying payment:', orderCode);
-
       const response = await axios.get<VerifyPaymentResponse>(
         `${this.baseURL}/payos/verify/${orderCode}`,
         {
           headers: this.getAuthHeaders(),
         }
       );
-
-      console.log('✅ Payment verified:', {
-        status: response.data.data.status,
-        payosStatus: response.data.data.payos_status,
-        fullData: response.data.data
-      });
 
       return response.data;
     } catch (error) {
@@ -148,8 +124,6 @@ class PaymentService {
     data?: CancelPaymentRequest
   ): Promise<CancelPaymentResponse> {
     try {
-      console.log('🚫 Cancelling payment:', orderCode);
-
       const response = await axios.post<CancelPaymentResponse>(
         `${this.baseURL}/payos/cancel/${orderCode}`,
         data || { cancellationReason: 'Customer cancelled payment' },
@@ -157,8 +131,6 @@ class PaymentService {
           headers: this.getAuthHeaders(),
         }
       );
-
-      console.log('✅ Payment cancelled');
 
       return response.data;
     } catch (error) {
@@ -172,8 +144,6 @@ class PaymentService {
    */
   async getTransactions(params?: GetTransactionsParams): Promise<TransactionListResponse> {
     try {
-      console.log('📋 Fetching transactions:', params);
-
       const response = await axios.get<TransactionListResponse>(
         `${this.baseURL}/transactions`,
         {
@@ -181,8 +151,6 @@ class PaymentService {
           headers: this.getAuthHeaders(),
         }
       );
-
-      console.log('✅ Transactions fetched:', response.data.data.pagination);
 
       return response.data;
     } catch (error) {
@@ -196,16 +164,12 @@ class PaymentService {
    */
   async getTransactionById(id: string): Promise<TransactionDetailResponse> {
     try {
-      console.log('🔍 Fetching transaction:', id);
-
       const response = await axios.get<TransactionDetailResponse>(
         `${this.baseURL}/transactions/${id}`,
         {
           headers: this.getAuthHeaders(),
         }
       );
-
-      console.log('✅ Transaction fetched');
 
       return response.data;
     } catch (error) {
@@ -228,7 +192,6 @@ class PaymentService {
 
     const poll = async () => {
       if (!isPolling || pollCount >= maxPolls) {
-        console.log('⏹️ Stopped polling payment status');
         return;
       }
 
@@ -242,7 +205,6 @@ class PaymentService {
         const finalStatuses = ['COMPLETED', 'CANCELLED', 'FAILED'];
         if (finalStatuses.includes(response.data.status)) {
           isPolling = false;
-          console.log('✅ Payment reached final status:', response.data.status);
           return;
         }
 
@@ -251,7 +213,6 @@ class PaymentService {
           setTimeout(poll, interval);
         }
       } catch (error) {
-        console.error('❌ Error polling payment status:', error);
         // Continue polling even on error
         if (isPolling) {
           setTimeout(poll, interval);
@@ -265,8 +226,7 @@ class PaymentService {
     // Return stop function
     return () => {
       isPolling = false;
-      console.log('🛑 Payment status polling stopped manually');
-    };
+      };
   }
 }
 

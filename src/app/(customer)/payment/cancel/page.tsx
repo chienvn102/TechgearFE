@@ -41,7 +41,6 @@ function PaymentCancelContent() {
           setPaymentData(response.data);
         }
       } catch (err) {
-        console.error('Payment verification error:', err);
         setError('Không thể xác minh trạng thái thanh toán');
       } finally {
         setIsVerifying(false);

@@ -30,22 +30,15 @@ export default function LoginPage() {
       const response = await authService.login(formData);
       if (response.success && response.data) {
         // Debug: Log the user object structure
-        console.log('✅ Login successful, user data:', response.data.user);
-        
         // Use authService methods to determine user type
         const userType = authService.getUserType();
-        console.log('👤 User type detected:', userType);
-        
         // Route based on user type
         if (userType === 'admin' || userType === 'manager') {
-          console.log('🔐 Redirecting to admin panel...');
           router.push('/admin'); // ✅ Redirect đến admin panel cho admin và manager
         } else if (userType === 'customer') {
-          console.log('🛒 Redirecting to home page...');
           // Force a page refresh to ensure Header updates
           window.location.href = '/';
         } else {
-          console.log('❓ Unknown user type, redirecting to home...');
           // Fallback for unknown user type
           window.location.href = '/';
         }

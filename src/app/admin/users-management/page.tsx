@@ -67,27 +67,17 @@ export default function UsersManagementPage() {
   // Load roles for filter
   const loadRoles = async () => {
     try {
-      console.log('🔄 Starting to load roles...');
       const response = await userManagementService.getAllRoles();
-      console.log('📊 Roles API Response:', response);
-      console.log('📊 Response type:', typeof response);
       console.log('📊 Response keys:', response ? Object.keys(response) : 'null');
       
       if (response && response.success) {
         const rolesData = response.data?.roles || response.data || [];
-        console.log('✅ Loaded Roles:', rolesData);
-        console.log('✅ Roles count:', rolesData.length);
         setRoles(rolesData);
       } else {
         console.warn('⚠️ Response not successful:', response);
         setRoles([]);
       }
     } catch (err: any) {
-      console.error('❌ Failed to load roles - Full error:', err);
-      console.error('❌ Error message:', err?.message);
-      console.error('❌ Error response:', err?.response);
-      console.error('❌ Error response data:', err?.response?.data);
-      console.error('❌ Error response status:', err?.response?.status);
       setRoles([]);
     }
   };

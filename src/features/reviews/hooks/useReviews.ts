@@ -121,8 +121,7 @@ export const useReviews = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch reviews';
       setError(errorMessage);
-      console.error('[useReviews] Error fetching reviews:', err);
-    } finally {
+      } finally {
       setLoading(false);
     }
   }, [productId, filters, pagination.page, pagination.limit]);
@@ -249,8 +248,7 @@ export const useAllReviews = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch reviews';
       setError(errorMessage);
-      console.error('[useAllReviews] Error fetching reviews:', err);
-    } finally {
+      } finally {
       setLoading(false);
     }
   }, [filters, pagination.page, pagination.limit]);

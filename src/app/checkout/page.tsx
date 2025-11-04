@@ -395,7 +395,6 @@ export default function CheckoutPage() {
               // HOLD: Don't redirect yet, wait for payment confirmation
             } else {
               // Payment creation failed - need to handle this
-              console.error('❌ PayOS payment creation failed:', paymentResponse.message);
               setError(paymentResponse.message || 'Không thể tạo thanh toán PayOS. Đơn hàng đã được tạo nhưng chưa thanh toán. Vui lòng liên hệ hỗ trợ.');
               
               // Optionally: Still redirect to order detail so customer can see their order
@@ -404,8 +403,6 @@ export default function CheckoutPage() {
               }, 5000);
             }
           } catch (paymentError: any) {
-            console.error('❌ PayOS payment error:', paymentError);
-            
             // Payment creation error - order is created but payment link failed
             const errorMessage = paymentError?.message || 'Có lỗi xảy ra khi tạo thanh toán PayOS';
             
@@ -455,8 +452,6 @@ export default function CheckoutPage() {
 
   // PayOS payment handlers
   const handlePayOSSuccess = (orderCode: number) => {
-    console.log('✅ PayOS payment success, orderCode:', orderCode);
-    
     // Close dialog
     setShowPayOSDialog(false);
     
@@ -476,8 +471,6 @@ export default function CheckoutPage() {
   };
 
   const handlePayOSTimeout = async () => {
-    console.log('⏰ Payment timeout - cancelling order');
-    
     setShowPayOSDialog(false);
     setPayosPaymentData(null);
     
@@ -496,7 +489,6 @@ export default function CheckoutPage() {
           router.push('/');
         }, 3000);
       } catch (err) {
-        console.error('Error cancelling order:', err);
         setError('Không thể hủy đơn hàng. Vui lòng liên hệ hỗ trợ.');
       }
     }

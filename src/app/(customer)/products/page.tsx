@@ -126,8 +126,7 @@ function ProductsContent() {
         setProducts(response.data.products || []);
       }
     } catch (error) {
-      console.error('Error loading products:', error);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

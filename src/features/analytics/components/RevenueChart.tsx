@@ -51,8 +51,7 @@ export function RevenueChart({ data: externalData, title }: RevenueChartProps) {
         setDateLabel(response.data.dateLabel);
       }
     } catch (error) {
-      console.error('Error fetching revenue timeline:', error);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

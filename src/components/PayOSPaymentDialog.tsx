@@ -68,11 +68,9 @@ export default function PayOSPaymentDialog({
         errorCorrectionLevel: 'M'
       })
         .then((url) => {
-          console.log('✅ QR code image generated successfully');
           setQrCodeImageUrl(url);
         })
         .catch((err) => {
-          console.error('❌ Failed to generate QR code:', err);
           setError('Không thể tạo mã QR. Vui lòng sử dụng link thanh toán.');
         });
     }
@@ -85,17 +83,14 @@ export default function PayOSPaymentDialog({
   useEffect(() => {
     // Only start timer when dialog is open and not in a final state
     if (!isOpen) {
-      console.log('⏸️ Dialog not open, timer not starting');
       return;
     }
     
     if (paymentStatus === PayOSStatus.PAID || paymentStatus === PayOSStatus.CANCELLED) {
-      console.log('⏸️ Payment already in final state:', paymentStatus);
       return;
     }
     
     if (isTimeout) {
-      console.log('⏸️ Already timed out');
       return;
     }
 
@@ -112,7 +107,6 @@ export default function PayOSPaymentDialog({
         
         // Timeout reached
         if (newValue <= 0) {
-          console.log('⏰ Payment timeout - 15 minutes expired');
           clearInterval(timer);
           setIsTimeout(true);
           setIsPolling(false);
@@ -138,7 +132,6 @@ export default function PayOSPaymentDialog({
     }, 1000);
 
     return () => {
-      console.log('🛑 Clearing countdown timer');
       clearInterval(timer);
     };
   }, [isOpen, paymentStatus, isTimeout, onTimeout]);
@@ -149,13 +142,10 @@ export default function PayOSPaymentDialog({
   const handlePaymentUpdate = useCallback((response: VerifyPaymentResponse) => {
     const { payos_status, status } = response.data;
     
-    console.log('🔄 Payment status update:', { payos_status, status });
-    
     setPaymentStatus(payos_status);
 
     // Payment completed
     if (payos_status === PayOSStatus.PAID && status === 'COMPLETED') {
-      console.log('✅ Payment completed successfully');
       setIsPolling(false);
       
       // Stop polling
@@ -173,7 +163,6 @@ export default function PayOSPaymentDialog({
 
     // Payment cancelled
     if (payos_status === PayOSStatus.CANCELLED || status === 'CANCELLED') {
-      console.log('❌ Payment was cancelled');
       setError('Thanh toán đã bị hủy');
       setIsPolling(false);
       
@@ -185,7 +174,6 @@ export default function PayOSPaymentDialog({
 
     // Payment failed
     if (status === 'FAILED') {
-      console.log('❌ Payment failed');
       setError('Thanh toán thất bại');
       setIsPolling(false);
       
@@ -202,7 +190,6 @@ export default function PayOSPaymentDialog({
   useEffect(() => {
     if (!isOpen || !paymentData || isPolling) return;
     
-    console.log('🔄 Starting payment status polling...');
     console.log('📱 Payment Data:', {
       qr_code: paymentData.qr_code?.substring(0, 50) + '...',
       payment_link: paymentData.payment_link,
@@ -251,7 +238,6 @@ export default function PayOSPaymentDialog({
    */
   const handleClose = () => {
     if (stopPollingRef.current) {
-      console.log('🛑 Stopping polling on close');
       stopPollingRef.current();
       stopPollingRef.current = null;
     }
@@ -279,8 +265,7 @@ export default function PayOSPaymentDialog({
       }
       handleClose();
     } catch (error) {
-      console.error('Failed to cancel payment:', error);
-    }
+      }
   };
 
   /**

@@ -67,7 +67,6 @@ class ReviewService {
       const response = await axios.get<ReviewListResponse>(`${REVIEWS_ENDPOINT}?${queryString}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching reviews:', error);
       throw this.handleError(error);
     }
   }
@@ -88,7 +87,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching product reviews:', error);
       throw this.handleError(error);
     }
   }
@@ -103,7 +101,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching review stats:', error);
       throw this.handleError(error);
     }
   }
@@ -118,7 +115,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching review:', error);
       throw this.handleError(error);
     }
   }
@@ -139,7 +135,6 @@ class ReviewService {
       );
       return response.data.data;
     } catch (error) {
-      console.error('Error checking purchase:', error);
       throw this.handleError(error);
     }
   }
@@ -157,7 +152,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error creating review:', error);
       throw this.handleError(error);
     }
   }
@@ -185,7 +179,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error uploading review images:', error);
       throw this.handleError(error);
     }
   }
@@ -202,7 +195,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error updating review:', error);
       throw this.handleError(error);
     }
   }
@@ -218,7 +210,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error deleting review:', error);
       throw this.handleError(error);
     }
   }
@@ -235,7 +226,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error marking review as helpful:', error);
       throw this.handleError(error);
     }
   }
@@ -252,7 +242,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error reporting review:', error);
       throw this.handleError(error);
     }
   }
@@ -277,7 +266,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching admin reviews:', error);
       throw this.handleError(error);
     }
   }
@@ -294,7 +282,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error hiding/unhiding review:', error);
       throw this.handleError(error);
     }
   }
@@ -330,7 +317,6 @@ class ReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching reported reviews:', error);
       throw this.handleError(error);
     }
   }

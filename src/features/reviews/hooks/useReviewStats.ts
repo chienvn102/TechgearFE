@@ -67,8 +67,6 @@ export const useReviewStats = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch review stats';
       setError(errorMessage);
-      console.error('[useReviewStats] Error fetching stats:', err);
-      
       // Set empty stats on error
       setStats({
         averageRating: 0,

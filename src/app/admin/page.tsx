@@ -58,7 +58,6 @@ export default function AdminDashboard() {
       return;
     }
 
-    console.log('✅ Dashboard access granted for:', userType);
     fetchDashboardData();
   }, [router]);
 
@@ -67,18 +66,9 @@ export default function AdminDashboard() {
       setLoading(true);
       setError(null);
 
-      console.log('🔄 Fetching dashboard analytics from backend...');
-
       // Fetch complete dashboard analytics from backend
       const analyticsResponse = await analyticsService.getDashboardData();
       
-      console.log('📊 Analytics Response:', analyticsResponse);
-      console.log('📊 Data:', analyticsResponse?.data);
-      console.log('📊 Revenue:', analyticsResponse?.data?.revenue);
-      console.log('📊 Orders:', analyticsResponse?.data?.orders);
-      console.log('📊 Customers:', analyticsResponse?.data?.customers);
-      console.log('📊 Products:', analyticsResponse?.data?.products);
-
       if (analyticsResponse.success && analyticsResponse.data) {
         const data = analyticsResponse.data;
         
@@ -91,10 +81,8 @@ export default function AdminDashboard() {
           totalRevenue: data.revenue?.total || data.revenue?.totalRevenue || 0
         };
         
-        console.log('✅ Setting stats to:', newStats);
         setStats(newStats);
       } else {
-        console.error('❌ Analytics failed:', analyticsResponse);
         setError('Không thể tải dữ liệu thống kê');
       }
 
@@ -115,8 +103,6 @@ export default function AdminDashboard() {
       }
 
     } catch (err: any) {
-      console.error('❌ Dashboard error:', err);
-      
       // More specific error handling
       if (err.message?.includes('401')) {
         setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');

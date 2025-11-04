@@ -35,8 +35,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         setUnreadCount(data.data.unreadCount);
       }
     } catch (error) {
-      console.error('Failed to refresh unread count:', error);
-    }
+      }
   };
 
   // Process notification queue
@@ -67,8 +66,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (isAuthenticated && userType === 'customer' && currentUser?._id) {
       const customerId = currentUser._id; // Use _id instead of customer_id
       
-      console.log('🔔 Initializing notification system for customer:', customerId);
-
       // Connect to Socket.io
       socketService.connect(customerId);
 
@@ -77,8 +74,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
       // Listen for new notifications
       const handleNewNotification = (data: any) => {
-        console.log('🔔 New notification received:', data);
-
         // Add to queue
         setNotificationQueue(prev => [...prev, data.notification]);
 

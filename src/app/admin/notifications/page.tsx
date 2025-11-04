@@ -61,8 +61,7 @@ export default function AdminNotificationsPage() {
         setStatistics(response.data);
       }
     } catch (err) {
-      console.error('Failed to load statistics:', err);
-    }
+      }
   };
 
   useEffect(() => {

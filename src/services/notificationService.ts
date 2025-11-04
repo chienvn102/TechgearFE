@@ -33,7 +33,6 @@ class NotificationService {
       const response = await apiClient.get(`${this.baseUrl}/unpaid-orders`);
       return response.data;
     } catch (error: any) {
-      console.error('Failed to get unpaid orders:', error);
       throw new Error(error.response?.data?.message || 'Failed to get unpaid orders');
     }
   }

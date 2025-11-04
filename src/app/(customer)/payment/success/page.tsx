@@ -48,7 +48,6 @@ function PaymentSuccessContent() {
           setError(response.message || 'Không thể xác minh thanh toán');
         }
       } catch (err) {
-        console.error('Payment verification error:', err);
         setError('Có lỗi xảy ra khi xác minh thanh toán');
       } finally {
         setIsVerifying(false);

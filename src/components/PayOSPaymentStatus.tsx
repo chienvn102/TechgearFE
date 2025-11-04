@@ -56,7 +56,6 @@ export function PayOSPaymentStatus({ orderId, paymentMethodId, paymentStatusName
         setError(response.message || 'Không thể xác minh thanh toán');
       }
     } catch (err) {
-      console.error('PayOS verification error:', err);
       setError('Có lỗi khi xác minh thanh toán PayOS');
     } finally {
       setIsVerifying(false);
@@ -95,7 +94,6 @@ export function PayOSPaymentStatus({ orderId, paymentMethodId, paymentStatusName
           }
         }
       } catch (err) {
-        console.error('Error loading PayOS payment data:', err);
         setError('Không thể tải dữ liệu thanh toán PayOS');
       } finally {
         setIsLoading(false);

@@ -42,7 +42,6 @@ export default function AnalyticsPage() {
         setError('Failed to fetch analytics data');
       }
     } catch (err) {
-      console.error('Analytics fetch error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);

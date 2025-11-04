@@ -20,13 +20,6 @@ interface SimplePaymentStatusProps {
  */
 export function SimplePaymentStatus({ paymentTransaction, paymentStatus }: SimplePaymentStatusProps) {
   
-  console.log('🔍 SimplePaymentStatus props:', {
-    paymentTransaction,
-    paymentStatus,
-    hasTransaction: !!paymentTransaction,
-    transactionStatus: paymentTransaction?.status
-  });
-  
   // Get status display based on priority
   const getStatusDisplay = () => {
     // Priority 1: Use payment_transaction.status if available

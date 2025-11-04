@@ -67,8 +67,7 @@ export default function AuditTrailPage() {
       }
     } catch (err) {
       setError('Không thể tải lịch sử hoạt động');
-      console.error(err);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

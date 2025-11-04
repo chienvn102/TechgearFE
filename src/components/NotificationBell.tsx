@@ -22,7 +22,6 @@ export const NotificationBell: React.FC = () => {
       const response = await notificationService.getUnpaidPayOSOrders();
       setUnpaidOrders(response.data.unpaid_orders);
     } catch (error) {
-      console.error('Failed to fetch unpaid orders:', error);
       // Don't show error to user, just log it
     }
   }, []);

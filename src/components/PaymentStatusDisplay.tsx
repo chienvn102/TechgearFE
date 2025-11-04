@@ -42,13 +42,6 @@ export function PaymentStatusDisplay({
   const [payosColor, setPayosColor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  console.log('🔍 PaymentStatusDisplay props:', { 
-    orderId, 
-    payosOrderCode, 
-    hasPaymentTransaction: !!paymentTransaction,
-    transactionStatus: paymentTransaction?.status
-  });
-
   // Check if this is a PayOS order
   const isPayOSOrder = () => {
     if (typeof paymentMethodId === 'object') {
@@ -64,7 +57,6 @@ export function PaymentStatusDisplay({
 
     // Check if we have payos_order_code from order
     if (!payosOrderCode) {
-      console.log('No PayOS order code found for this order');
       setPayosStatus(null);
       setPayosColor(null);
       return;
@@ -115,7 +107,6 @@ export function PaymentStatusDisplay({
       }
       
     } catch (err) {
-      console.error('Error fetching PayOS status:', err);
       // Silent fail - use database status as fallback
       setPayosStatus(null);
       setPayosColor(null);

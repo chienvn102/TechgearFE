@@ -90,7 +90,6 @@ export const useReviewActions = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to mark review as helpful';
       setError(errorMessage);
-      console.error('[useReviewActions] Error marking helpful:', err);
       onError?.(errorMessage);
       return false;
     } finally {
@@ -129,7 +128,6 @@ export const useReviewActions = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to report review';
       setError(errorMessage);
-      console.error('[useReviewActions] Error reporting review:', err);
       onError?.(errorMessage);
       return false;
     } finally {
@@ -163,7 +161,6 @@ export const useReviewActions = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete review';
       setError(errorMessage);
-      console.error('[useReviewActions] Error deleting review:', err);
       onError?.(errorMessage);
       return false;
     } finally {
@@ -260,7 +257,6 @@ export const useAdminReviewActions = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to hide review';
       setError(errorMessage);
-      console.error('[useAdminReviewActions] Error hiding review:', err);
       onError?.(errorMessage);
       return false;
     } finally {
@@ -294,7 +290,6 @@ export const useAdminReviewActions = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete review';
       setError(errorMessage);
-      console.error('[useAdminReviewActions] Error deleting review:', err);
       onError?.(errorMessage);
       return false;
     } finally {
