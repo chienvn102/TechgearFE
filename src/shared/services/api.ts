@@ -30,13 +30,6 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Log request in development only
-    if (process.env.NEXT_PUBLIC_ENV === 'development') {
-      console.log('📤 API Request:', config.method?.toUpperCase(), config.url);
-      if (token) {
-        }
-    }
-    
     return config;
   },
   (error) => {
