@@ -79,13 +79,7 @@ const nextConfig: NextConfig = {
 	
 	// Redirects for better UX
 	async redirects() {
-		return [
-			{
-				source: '/admin',
-				destination: '/admin/dashboard',
-				permanent: true,
-			},
-		];
+		return [];
 	},
 };
 
