@@ -69,19 +69,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     // Allow both ADMIN and MANAGER to access admin panel
     if (!authService.isAuthenticated() || (!authService.isAdmin() && !authService.isManager())) {
-      console.log('isAuthenticated:', authService.isAuthenticated());
-      console.log('isAdmin:', authService.isAdmin());
-      console.log('isManager:', authService.isManager());
-      window.location.href = 'http://localhost:5000/login';
-    } else {
-      console.log('User role:', authService.getUserRole());
+      router.push('/login');
     }
     setMounted(true);
   }, [router]);
 
   const handleLogout = async () => {
     await authService.logout();
-    window.location.href = 'http://localhost:5000/login';
+    router.push('/login');
   };
 
   if (!mounted) {

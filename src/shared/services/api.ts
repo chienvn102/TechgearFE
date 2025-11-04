@@ -79,11 +79,7 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('user_data');
             localStorage.removeItem('user');
             if (typeof window !== 'undefined') {
-              // Use dynamic redirect based on environment
-              const loginUrl = process.env.NEXT_PUBLIC_ENV === 'production' 
-                ? '/login' 
-                : 'http://localhost:5000/login';
-              window.location.href = loginUrl;
+              window.location.href = '/login';
             }
           } else {
             }
