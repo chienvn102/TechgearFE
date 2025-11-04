@@ -27,22 +27,20 @@ export interface AddressData {
 }
 
 class AddressService {
-  private baseUrl = 'https://provinces.open-api.vn/api';
+  private baseUrl = '/address'; // Use backend proxy instead of direct API call
 
   /**
    * Lấy danh sách tỉnh/thành phố
    */
   async getProvinces(): Promise<Province[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/p/`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch provinces');
-      }
-      const data = await response.json();
-      return data.map((item: any) => ({
+      const response = await apiClient.get(`${this.baseUrl}/provinces`);
+      // Backend proxy returns array directly
+      const data = response.data;
+      return Array.isArray(data) ? data.map((item: any) => ({
         code: item.code,
         name: item.name
-      }));
+      })) : [];
     } catch (error) {
       throw error;
     }
@@ -53,11 +51,8 @@ class AddressService {
    */
   async getDistricts(provinceCode: string): Promise<District[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/p/${provinceCode}?depth=2`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch districts');
-      }
-      const data = await response.json();
+      const response = await apiClient.get(`${this.baseUrl}/provinces/${provinceCode}`);
+      const data = response.data;
       return data.districts?.map((item: any) => ({
         code: item.code,
         name: item.name,
@@ -73,11 +68,8 @@ class AddressService {
    */
   async getWards(districtCode: string): Promise<Ward[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/d/${districtCode}?depth=2`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch wards');
-      }
-      const data = await response.json();
+      const response = await apiClient.get(`${this.baseUrl}/districts/${districtCode}`);
+      const data = response.data;
       return data.wards?.map((item: any) => ({
         code: item.code,
         name: item.name,

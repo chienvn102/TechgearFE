@@ -74,7 +74,8 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
         }
       }
     } catch (error) {
-      } finally {
+      /* Error handled */
+    } finally {
       setLoading(false);
     }
   };
@@ -113,7 +114,8 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
       // Reload addresses
       await loadAddresses();
     } catch (error) {
-      }
+      /* Error handled */
+    }
   };
 
   const handleEditAddress = (address: CustomerAddress) => {
@@ -150,7 +152,8 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
       await customerAddressService.deleteAddress(addressId);
       await loadAddresses();
     } catch (error) {
-      }
+      /* Error handled */
+    }
   };
 
   const handleSetDefault = async (addressId: string) => {
