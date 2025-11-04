@@ -202,15 +202,6 @@ class AuthService extends BaseService {
     const user = this.getCurrentUser() as any;
     if (!user) return false;
     
-    // Debug logging
-    console.log('🔍 isManager() check:', {
-      user,
-      role_id: user.role_id,
-      role_id_role_id: user.role_id?.role_id,
-      role: user.role,
-      role_role_id: user.role?.role_id
-    });
-    
     // Manager users have role_id object structure:
     // { role_id: { _id: "...", role_id: "MANAGER", role_name: "Manager" } }
     if (user.role_id?.role_id === 'MANAGER') {
